@@ -1,0 +1,36 @@
+[
+  {
+    "id": 1,
+    "restaurant": {
+      "name": "Kobe Sushi By NOE",
+      "photo": "https://media-cdn.tripadvisor.com/media/photo-s/1d/f6/20/06/kobe-sushi-rolls-ayce.jpg",
+      "address": "Francisco Salazar, Quito 170143"
+    },
+    "time": "2024-03-28T17:00:00",
+    "date": "2024-03-28",
+    "numberOfPeople": 4
+  },
+  {
+    "id": 2,
+    "restaurant": {
+      "name": "Casa Res | Steak House",
+      "photo": "https://www.cci.com.ec/wp-content/uploads/2020/02/CASA-RES-1.jpg",
+      "address": "Av. Río Amazonas N36-152, Quito 170506"
+    },
+    "time": "2024-03-29T14:00:00",
+    "date": "2024-03-29",
+    "numberOfPeople": 2
+  },
+  {
+    "id": 3,
+    "restaurant": {
+      "name": "McDonalds",
+      "photo": "https://lh3.googleusercontent.com/p/AF1QipN_-oUZUdUhZ80sxnGAGXTfgyym6Jg7y8DKaq1k=s680-w680-h510",
+      "address": "6 de Diciembre, y Esquina, Quito 170143"
+    },
+    "time": "2024-03-30T13:30:00",
+    "date": "2024-03-30",
+    "numberOfPeople": 4
+  } 
+  
+]

@@ -1,0 +1,95 @@
+[
+  {
+      "id": 1,
+      "titulo": "Kobe Sushi By NOE",
+      "imagen": [
+          "https://media-cdn.tripadvisor.com/media/photo-s/1d/f6/20/06/kobe-sushi-rolls-ayce.jpg",
+          "https://kobe-sushi.com/wp-content/uploads/2023/04/DSC01608.jpg"
+      ],
+      "direccion": "Francisco Salazar, Quito 170143",
+      "informacion_restaurante": {
+          "nombre": "Kobe Sushi By NOE",
+          "direccion": "Francisco Salazar, Quito 170143",
+          "menu": [
+              {
+                  "nombre": "Kobe Beef Steak",
+                  "precio": 50,
+                  "foto": "https://howtocookmeat.com/wp-content/uploads/2018/05/header-27-768x512.jpg"
+              },
+              {
+                  "nombre": "Plato de sushi",
+                  "precio": 30,
+                  "foto": "https://az727718.vo.msecnd.net/e5184b75632349358c9031c2ef988e6b/images/0ac13014da6f4fd1adee7eb7fc2f70eb_1080w.jpg"
+              },
+              {
+                  "nombre": "Sopa Miso",
+                  "precio": 5,
+                  "foto": "https://d36fw6y2wq3bat.cloudfront.net/recipes/sopa-de-miso-con-tofu-y-vegetales/900/sopa-de-miso-con-tofu-y-vegetales_version_1687406461.jpg"
+              }
+          ]
+      },
+      "calificacion": 4
+  },
+  {
+      "id": 2,
+      "titulo": "Casa Res | Steak House",
+      "imagen": [
+          "https://www.cci.com.ec/wp-content/uploads/2020/02/CASA-RES-1.jpg",
+          "https://lh5.googleusercontent.com/p/AF1QipNjwnZJXvooHVjL6Bf-kmC7hJ3fveBT3FmcMZYs=w280-h210-k-no"
+      ],
+      "direccion": "Av. Río Amazonas N36-152, Quito 170506",
+      "informacion_restaurante": {
+          "nombre": "Casa Res | Steak House",
+          "direccion": "Av. Río Amazonas N36-152, Quito 170506",
+          "menu": [
+              {
+                  "nombre": "Parrillada Argentina",
+                  "precio": 40,
+                  "foto": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSqW10uJHltZseH7eqnFBur2UDAEvz3nYAo4xVC82Wsdg&s"
+              },
+              {
+                  "nombre": "Milanesa Napolitana",
+                  "precio": 20,
+                  "foto": "https://upload.wikimedia.org/wikipedia/commons/4/47/Milanesa_napolitana_%281%29.jpg"
+              },
+              {
+                  "nombre": "Empanadas (por unidad)",
+                  "precio": 3,
+                  "foto": "https://www.laylita.com/recetas/wp-content/uploads/2017/02/Receta-de-empanadas-de-carne.jpg"
+              }
+          ]
+      },
+      "calificacion": 5
+  },
+  {
+      "id": 3,
+      "titulo": "McDonalds",
+      "imagen": [
+          "https://lh3.googleusercontent.com/p/AF1QipN_-oUZUdUhZ80sxnGAGXTfgyym6Jg7y8DKaq1k=s680-w680-h510",
+          "https://lh3.googleusercontent.com/p/AF1QipNrfVULsgYG7BgdPzwyZE2O0ipweVQWcl3DmP-c=s680-w680-h510"
+      ],
+      "direccion": "6 de Diciembre, y Esquina, Quito 170143",
+      "informacion_restaurante": {
+          "nombre": "McDonalds",
+          "direccion": "6 de Diciembre, y Esquina, Quito 170143",
+          "menu": [
+              {
+                  "nombre": "Big Mac",
+                  "precio": 5,
+                  "foto": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJ1tElLdDem8gYvRnge01_f1xKWZO3DZ9-FWWPA95khw&s"
+              },
+              {
+                  "nombre": "McNuggets",
+                  "precio": 4,
+                  "foto": "https://culturacientifica.com/app/uploads/2015/07/imagen-1.png"
+              },
+              {
+                  "nombre": "Papas Fritas (tamaño mediano)",
+                  "precio": 2,
+                  "foto": "https://cache-backend-mcd.mcdonaldscupones.com/media/image/product$ktX5ZYyM/200/200/original?country=ec"
+              }
+          ]
+      },
+      "calificacion": 3
+  }
+]
