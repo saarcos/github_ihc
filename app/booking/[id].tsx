@@ -22,10 +22,8 @@ const Booking = () => {
       })
     })
     const {id}=useLocalSearchParams<{id:string}>();
-    console.log("ID booking:",id);
     const idComoNumero = parseInt(id); 
     const listing=(listingsData as any[]).find((item)=>item.id===idComoNumero);
-    console.log(listing)
   return (
     <View style={[defaultStyles.container]}>
       <Animated.ScrollView>

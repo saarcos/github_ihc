@@ -10,7 +10,6 @@ const IMG_HEIGHT=300;
 const {width}=Dimensions.get('window');
 const Page = () => {
     const {id}=useLocalSearchParams<{id:string}>();
-    console.log("ID:",id);
     const listing=(listingsData as any[]).find((item)=>item.id===id);
     const scrollRef=useAnimatedRef<Animated.ScrollView>();
     const scrollOffset=useScrollViewOffset(scrollRef);

@@ -41,7 +41,6 @@ const Page = () =>{
   const idComoNumero = parseInt(id); 
   const restauranteEncontrado = restaurantes.find(restaurante => restaurante.id === idComoNumero);
 
-  console.log(restauranteEncontrado);
 
 
 
