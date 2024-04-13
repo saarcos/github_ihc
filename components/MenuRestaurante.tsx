@@ -12,6 +12,7 @@ import Animated, {
     useAnimatedStyle,
     useScrollViewOffset,
 } from 'react-native-reanimated';
+import { Restaurante } from '@/app/api/api';
 const { width } = Dimensions.get('window');
 const IMG_HEIGHT = 300;
 
@@ -19,22 +20,10 @@ interface Menu {
     nombre: string;
     precio: number;
     foto: string;
-  }
+}
   
-  interface RestauranteFiltrado {
-    id: number;
-    titulo: string;
-    imagen: string[];
-    direccion: string;
-    informacion_restaurante: {
-      nombre: string;
-      direccion: string;
-      menu: Menu[];
-    };
-  }
-
 interface Props {
-  restaurante: RestauranteFiltrado;
+  restaurante: Restaurante;
 }
 
 
@@ -77,10 +66,10 @@ const MenuRestaurante = ({ restaurante }: Props) => {
          <View style={styles.background}>
                 <Animated.Image
                     style={[styles.image, imageAnimatedStyle]}
-                    source={{ uri: restaurante.imagen[0] }}
+                    source={{ uri: restaurante.foto }}
                 />
                 <View style={styles.overlay}>
-                    <Text style={styles.text}>{restaurante.titulo}</Text>
+                    <Text style={styles.text}>{restaurante.nombre}</Text>
                     <View style={styles.btnContainer}>
                     <Link href={`/booking/${restaurante.id}`} asChild>
                         <TouchableOpacity style={styles.btnReserva}><Text style={{color:'#fff', fontFamily:'appfont-bold', fontSize:15}}>Reservar</Text></TouchableOpacity>
@@ -92,7 +81,7 @@ const MenuRestaurante = ({ restaurante }: Props) => {
                     {pintarEstrellas(estrellas)}
                 </View>
             </View>
-            {restaurante.informacion_restaurante.menu.map((item, index) => {
+            {/* {restaurante.informacion_restaurante.menu.map((item, index) => {
                 if (index % 2 === 0) {
                     const nextItem = restaurante.informacion_restaurante.menu[index + 1];
                     return (
@@ -117,7 +106,7 @@ const MenuRestaurante = ({ restaurante }: Props) => {
                 } else {
                     return null;
                 }
-                })}
+                })} */}
       </Animated.ScrollView>
     
   );

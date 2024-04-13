@@ -1,51 +1,45 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, ScrollView, Animated } from 'react-native';
+import { StyleSheet, View, ScrollView, Animated, ActivityIndicator } from 'react-native';
 import { Card, Text, IconButton, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import Colors from '@/constants/Colors';
+import { Restaurante } from '@/app/api/api';
 
-// Asegúrate de importar la fuente 'appfont-bold' aquí
-// Puedes hacerlo según cómo hayas configurado las fuentes en tu proyecto
-
-interface Restaurante {
-  id:number;
-  titulo: string;
-  imagen: string[];
-  direccion: string;
-}
 
 interface Props {
   restaurante: Restaurante;
 }
 
 const Restaurantes = ({ restaurante }: Props) => {
-  const [imagena, imagenb] = useState<string[]>(restaurante.imagen);
+  // const [imagena, imagenb] = useState<string[]>(restaurante.imagen);
   const [opacity] = useState(new Animated.Value(1));
   const [favoritos, setFavoritos] = useState<boolean>(false);
+  const [imagenCargando, setImagenCargando] = useState(true);
 
-  useEffect(() => {
-    const intervaloId = setInterval(() => {
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }).start(() => {
-        imagenb(imagenAnterior => {
-          const imagenActualIndex = imagenAnterior.findIndex(imagen => imagen === imagena[0]);
-          const imagenSiguiente = (imagenActualIndex + 1) % imagenAnterior.length;
-          return [imagenAnterior[imagenSiguiente]];
-        });
-        Animated.timing(opacity, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }).start();
-      });
-    }, 5000);
 
-    return () => clearInterval(intervaloId);
-  }, []);
+  // useEffect(() => {
+  //   const intervaloId = setInterval(() => {
+  //     Animated.timing(opacity, {
+  //       toValue: 0,
+  //       duration: 500,
+  //       useNativeDriver: true,
+  //     }).start(() => {
+  //       imagenb(imagenAnterior => {
+  //         const imagenActualIndex = imagenAnterior.findIndex(imagen => imagen === imagena[0]);
+  //         const imagenSiguiente = (imagenActualIndex + 1) % imagenAnterior.length;
+  //         return [imagenAnterior[imagenSiguiente]];
+  //       });
+  //       Animated.timing(opacity, {
+  //         toValue: 1,
+  //         duration: 500,
+  //         useNativeDriver: true,
+  //       }).start();
+  //     });
+  //   }, 5000);
+
+  //   return () => clearInterval(intervaloId);
+  // }, []);
 
   const toggleFavorito = () => {
     setFavoritos(prevFavorito => !prevFavorito);
@@ -57,14 +51,18 @@ const Restaurantes = ({ restaurante }: Props) => {
         <Card>
           <View style={styles.imagenContenedor}>
             <Animated.Image
-              source={{ uri: imagena[0] }}
-              style={[styles.imagen, { opacity, borderRadius: 10 }]} // Aplicando el borde redondeado
+              source={{ uri: restaurante.foto }}
+              style={[styles.imagen, { opacity, borderRadius: 10 }]}
+              onLoad={() => setImagenCargando(false)}
             />
           </View>
+          {imagenCargando && (
+              <ActivityIndicator style={styles.spinner} size="large" color="gray" />
+          )}
           <Card.Content style={styles.cardContent}>
             <View style={styles.infoContainer}>
               <View style={styles.tituloContainer}>
-                <Text style={styles.titulo}>{restaurante.titulo}</Text>
+                <Text style={styles.titulo}>{restaurante.nombre}</Text>
               </View>
               <Text>{restaurante.direccion}</Text>
               <Link href={`/menu/${restaurante.id}`} asChild>
@@ -98,6 +96,12 @@ const Restaurantes = ({ restaurante }: Props) => {
 };
 
 const styles = StyleSheet.create({
+  spinner: {
+    position: 'absolute',
+    top: '35%',
+    left: '50%',
+    transform: [{ translateX: -10 }, { translateY: -10 }],
+  },
   container: {
     flex: 1,
     backgroundColor: '#fff',

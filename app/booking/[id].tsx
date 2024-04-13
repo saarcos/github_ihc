@@ -1,12 +1,14 @@
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
-import React, { useLayoutEffect } from 'react'
+import { View,  StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native'
+import React, {  useLayoutEffect, useState } from 'react'
 import { useLocalSearchParams, useNavigation } from 'expo-router';
-import listingsData from '@/assets/data/restaurantes.json';
 import Info from '@/components/Reservas-info';
 import ProcesoReserva from '@/components/Reservas-proceso'
 import { defaultStyles } from '@/constants/Styles';
 import Animated, { SlideInDown, interpolate, useAnimatedRef, useAnimatedStyle, useScrollViewOffset } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
+import {  getRestauranteByID, getRestaurantes } from '../api/api';
+import Colors from '@/constants/Colors';
+import { useQuery } from '@tanstack/react-query';
 const Booking = () => {
     const navigation=useNavigation();
     useLayoutEffect(()=>{
@@ -23,11 +25,17 @@ const Booking = () => {
     })
     const {id}=useLocalSearchParams<{id:string}>();
     const idComoNumero = parseInt(id); 
-    const listing=(listingsData as any[]).find((item)=>item.id===idComoNumero);
+    const {data:restaurante}=useQuery({queryKey:['restaurante',idComoNumero], queryFn:()=>getRestauranteByID(idComoNumero)})
+
   return (
     <View style={[defaultStyles.container]}>
       <Animated.ScrollView>
-      <Info restaurant={listing}/>
+        {restaurante? (      
+        <Info restaurant={restaurante}/>
+      ):
+      (<View style={defaultStyles.container}>
+          <ActivityIndicator style={styles.spinner} size="large" color={Colors.dark} />
+        </View>)}
       <ProcesoReserva/>
       </Animated.ScrollView>
     </View>
@@ -46,6 +54,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     color: "#fff",
+  },
+  spinner: {
+    padding:100,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 })
 

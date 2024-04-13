@@ -7,7 +7,12 @@ import { useEffect } from 'react';
 import { TouchableOpacity } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { ClerkProvider, useAuth } from '@clerk/clerk-expo';
-import { white } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
+// import { white } from 'react-native-paper/lib/typescript/styles/themes/v2/colors';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const client=new QueryClient();
+
 
 const CLERK_PUBLISHABLE_KEY=process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
@@ -77,35 +82,37 @@ function RootLayoutNav() {
   },[isLoaded])
   
   return (
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name='(modals)/login' options={{
-          title:'Inicia Sesión o Registrate',
-          headerShadowVisible: false,
-          presentation:'modal',
-          headerTitle: () => null,
-          headerLeft:()=>
-            (<TouchableOpacity onPress={()=>router.back()}>
-              <Ionicons name='close-outline' size={28} style={{ color: 'white' }}/>
-            </TouchableOpacity>),
-          headerStyle: {
-            backgroundColor: '#E5332A',
-          },
-        }}/>
-        <Stack.Screen name="listing/[id]" options={{
-          headerTitle:'', headerTransparent:true,
-        }}/>
-        <Stack.Screen name='(modals)/booking' 
-        options={{
-          presentation:'transparentModal',
-          headerLeft:()=>
-            (<TouchableOpacity onPress={()=>router.back()}>
-              <Ionicons name='close-outline' size={28}/>
-            </TouchableOpacity>),
-          animation:'fade',
-          
-        }}/>
-      </Stack>
+    <QueryClientProvider client={client}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name='(modals)/login' options={{
+            title:'Inicia Sesión o Registrate',
+            headerShadowVisible: false,
+            presentation:'modal',
+            headerTitle: () => null,
+            headerLeft:()=>
+              (<TouchableOpacity onPress={()=>router.back()}>
+                <Ionicons name='close-outline' size={28} style={{ color: 'white' }}/>
+              </TouchableOpacity>),
+            headerStyle: {
+              backgroundColor: '#E5332A',
+            },
+          }}/>
+          <Stack.Screen name="listing/[id]" options={{
+            headerTitle:'', headerTransparent:true,
+          }}/>
+          <Stack.Screen name='(modals)/booking' 
+          options={{
+            presentation:'transparentModal',
+            headerLeft:()=>
+              (<TouchableOpacity onPress={()=>router.back()}>
+                <Ionicons name='close-outline' size={28}/>
+              </TouchableOpacity>),
+            animation:'fade',
+            
+          }}/>
+        </Stack>
+      </QueryClientProvider>
 
   );
 }

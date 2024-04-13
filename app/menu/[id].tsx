@@ -1,28 +1,19 @@
-import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { FlatList } from 'react-native-gesture-handler';
+import { View, StyleSheet, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React, { useLayoutEffect, useState } from 'react';
 import Colors from '@/constants/Colors';
-import restaurantesData from '@/assets/data/restaurantes.json';
 import MenuRestaurante from '@/components/MenuRestaurante';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-interface Menu {
-    nombre: string;
-    precio: number;
-    foto: string;
-  }
-  interface RestauranteFiltrado {
-    id: number;
-    titulo: string;
-    imagen: string[];
-    direccion: string;
-    informacion_restaurante: {
-      nombre: string;
-      direccion: string;
-      menu: Menu[];
-    };
-  }
+import { Restaurante, getRestauranteByID, getRestaurantes } from '../api/api';
+import { defaultStyles } from '@/constants/Styles';
+import { useQuery } from '@tanstack/react-query';
+
+// interface Menu {
+//     nombre: string;
+//     precio: number;
+//     foto: string;
+//   }
 const Page = () =>{
   const navigation=useNavigation();
   useLayoutEffect(() => {
@@ -36,20 +27,19 @@ const Page = () =>{
       ),
     });
   }, []);
-  const [restaurantes, setRestaurantes] = useState<RestauranteFiltrado[]>(restaurantesData);
-  const {id}=useLocalSearchParams<{id:string}>();
-  const idComoNumero = parseInt(id); 
-  const restauranteEncontrado = restaurantes.find(restaurante => restaurante.id === idComoNumero);
+  const { id } = useLocalSearchParams<{ id: string }>(); // Obtiene el ID del restaurante de los parámetros de la URL
+  const restauranteID = parseInt(id); // Convertir a número
+  const { data: restaurante} = useQuery({queryKey:['restaurante',restauranteID],queryFn:()=> getRestauranteByID(restauranteID)});
 
-
-
-
+  
   return (
     <View>
-      {restauranteEncontrado ? (
-        <MenuRestaurante restaurante={restauranteEncontrado} />
+      {restaurante ? (
+        <MenuRestaurante restaurante={restaurante} />
       ) : (
-        <Text>No se encontró ningún restaurante con el ID proporcionado.</Text>
+        <View style={defaultStyles.container}>
+              <ActivityIndicator style={styles.spinner} size="large" color={Colors.dark} />
+        </View>
       )}
     </View>
   );
@@ -76,6 +66,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 10,
+  },
+  spinner: {
+    padding:100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop:200,
   },
 });
 
