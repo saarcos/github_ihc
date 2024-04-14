@@ -47,6 +47,14 @@ const Layout = () => {
                 />
             }
         }/>
+        <Tabs.Screen 
+            name="menuAdmin" 
+            options={{
+                tabBarActiveTintColor:"#d09306",
+                tabBarLabel:'menuAdmin',
+                tabBarIcon:({color,size})=><Ionicons name='restaurant' color={color} size={size}/>
+            }
+        }/>
     </Tabs>
     
   )

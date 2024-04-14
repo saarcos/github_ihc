@@ -1,0 +1,14 @@
+[
+    {
+        "id":1,
+        "nombre": "Plato de sushi",
+        "precio": 30,
+        "foto": "https://az727718.vo.msecnd.net/e5184b75632349358c9031c2ef988e6b/images/0ac13014da6f4fd1adee7eb7fc2f70eb_1080w.jpg"
+    },
+    {
+        "id":2,
+        "nombre": "Kobe Beef Steak",
+        "precio": 50,
+        "foto": "https://howtocookmeat.com/wp-content/uploads/2018/05/header-27-768x512.jpg"
+    }
+]

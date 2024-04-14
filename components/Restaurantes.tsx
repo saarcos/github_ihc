@@ -75,6 +75,7 @@ const Restaurantes = ({ restaurante }: Props) => {
                 Ver Menú
               </Button>
               </Link>
+              
             </View>
             <View style={styles.iconoContainer}>
               <IconButton

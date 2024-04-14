@@ -5,15 +5,11 @@ import MenuRestaurante from '@/components/MenuRestaurante';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { Restaurante, getRestauranteByID, getRestaurantes } from '../api/api';
+import { Restaurante, getRestauranteByID, getRestaurantes ,getPlatoRestauranteByID } from '../api/api';
 import { defaultStyles } from '@/constants/Styles';
 import { useQuery } from '@tanstack/react-query';
 
-// interface Menu {
-//     nombre: string;
-//     precio: number;
-//     foto: string;
-//   }
+
 const Page = () =>{
   const navigation=useNavigation();
   useLayoutEffect(() => {
@@ -30,12 +26,14 @@ const Page = () =>{
   const { id } = useLocalSearchParams<{ id: string }>(); // Obtiene el ID del restaurante de los parámetros de la URL
   const restauranteID = parseInt(id); // Convertir a número
   const { data: restaurante} = useQuery({queryKey:['restaurante',restauranteID],queryFn:()=> getRestauranteByID(restauranteID)});
+  const { data: plato } = useQuery({queryKey:['plato',restauranteID],queryFn:()=> getPlatoRestauranteByID(restauranteID)});
 
-  
+  console.log('restaurante:', restaurante);
+  console.log('plato:', plato);
   return (
     <View>
-      {restaurante ? (
-        <MenuRestaurante restaurante={restaurante} />
+      {restaurante && plato ?(
+        <MenuRestaurante restaurante={restaurante} plato={plato} />
       ) : (
         <View style={defaultStyles.container}>
               <ActivityIndicator style={styles.spinner} size="large" color={Colors.dark} />

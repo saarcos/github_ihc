@@ -6,11 +6,17 @@ export interface Categoria{
     nombre:string;
 }
   // Interface para la tabla 'plato'
-  interface Plato {
+export  interface Plato {
     id: number;
     id_restaurante: number;
-    nombre?: string;
-    foto?: string;
+    nombre: string;
+    foto: string;
+    precio: number;
+  }
+export  interface PlatoInsert {
+    id_restaurante: number;
+    nombre: string;
+    foto: string;
     precio: number;
   }
   
@@ -64,6 +70,77 @@ export interface Categoria{
       return data as Restaurante;
     } catch (error) {
       throw new Error('Error al obtener el restaurante con el id');
+    }
+  };
+  export const getPlatoByID = async (id: number): Promise<Plato> => {
+    try {
+      const response = await fetch(`${API_URL}/platos/${id}`);
+      if (!response.ok) {
+        throw new Error('Error al obtener el plato.');
+      }
+      const data = await response.json();
+      return data as Plato;
+    } catch (error) {
+      throw new Error('Error al obtener el plato con el id');
+    }
+  };
+  export const getPlatoRestauranteByID = async (id: number): Promise<Plato> => {
+    try {
+      const response = await fetch(`${API_URL}/platosRestaurante/${id}`);
+      if (!response.ok) {
+        throw new Error('Error al obtener los platos.');
+      }
+      const data = await response.json();
+      return data as Plato;
+    } catch (error) {
+      throw new Error('Error al obtener los platos con el id');
+    }
+  };
+  
+
+  export const editarPlato = async (id: number, nuevoPlato: Plato): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/platos/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevoPlato),
+      });
+      if (!response.ok) {
+        throw new Error('Error al editar el plato.');
+      }
+    } catch (error) {
+      throw new Error('Error al editar el plato.');
+    }
+  };
+  export const insertarPlato = async ( nuevoPlato: PlatoInsert): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/platos/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevoPlato),
+      });
+      if (!response.ok) {
+        throw new Error('Error al INSERTAR el plato.');
+      }
+    } catch (error) {
+      throw new Error('Error al INSERTAR el plato.');
+    }
+  };
+  
+  export const eliminarPlato = async (id: number): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/platos/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error al eliminar el plato.');
+      }
+    } catch (error) {
+      throw new Error('Error al eliminar el plato.');
     }
   };
   

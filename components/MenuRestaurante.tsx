@@ -12,27 +12,27 @@ import Animated, {
     useAnimatedStyle,
     useScrollViewOffset,
 } from 'react-native-reanimated';
-import { Restaurante } from '@/app/api/api';
+import { Restaurante , Plato  } from '@/app/api/api';
+
 const { width } = Dimensions.get('window');
 const IMG_HEIGHT = 300;
 
-interface Menu {
-    nombre: string;
-    precio: number;
-    foto: string;
-}
+
   
 interface Props {
   restaurante: Restaurante;
+  plato: Plato;
 }
 
 
-const MenuRestaurante = ({ restaurante }: Props) => {
+const MenuRestaurante = ({ restaurante, plato }: Props) => {
     const [estrellas, setEstrellas] = useState<number>(4);
     const [maxEstrellas, setMaxEstrellas] = useState<number>(5);
     const estrella = 'https://github.com/tranhonghan/images/blob/main/star_corner.png?raw=true';
     const estrellaPintada = 'https://github.com/tranhonghan/images/blob/main/star_filled.png?raw=true';
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
+    const platoArray = Array.isArray(plato) ? plato : [plato];
+
     const pintarEstrellas = (numEstrellas: number) => {
         return Array.from({ length: maxEstrellas }, (_, index) => (
         <TouchableOpacity key={index}>
@@ -81,9 +81,10 @@ const MenuRestaurante = ({ restaurante }: Props) => {
                     {pintarEstrellas(estrellas)}
                 </View>
             </View>
-            {/* {restaurante.informacion_restaurante.menu.map((item, index) => {
+
+            {platoArray.map((item, index) => {
                 if (index % 2 === 0) {
-                    const nextItem = restaurante.informacion_restaurante.menu[index + 1];
+                    const nextItem = platoArray[index + 1];
                     return (
                     <View key={index} style={styles.containercard}>
                         <View style={{ flexDirection: 'row' }}>
@@ -106,7 +107,11 @@ const MenuRestaurante = ({ restaurante }: Props) => {
                 } else {
                     return null;
                 }
-                })} */}
+                })}
+
+
+                    
+
       </Animated.ScrollView>
     
   );
