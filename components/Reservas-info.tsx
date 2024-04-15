@@ -30,8 +30,8 @@ const Info = ({restaurant}:Props) => {
               <Text style={{fontSize:16, color:Colors.dark, width:'68%', fontFamily:'appfont'}}>{restaurant.direccion}</Text>
             </View>
             <View style={{display:'flex', flexDirection:'row', gap:5, alignItems:'center'}}>
-              <Ionicons name='star'size={22} color={Colors.red} />
-              {/* <Text style={{fontSize:16, color:Colors.dark, width:'80%', fontFamily:'appfont'}}>{restaurant.calificacion}</Text> */}
+              <Ionicons name='time'size={22} color={Colors.red} />
+              <Text style={{fontSize:16, color:Colors.dark, width:'80%', fontFamily:'appfont'}}>Abierto desde: {restaurant.horaApertura} am</Text>
               
             </View>
           </View>

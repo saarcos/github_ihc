@@ -28,8 +28,8 @@ const Page = () =>{
   const { data: restaurante} = useQuery({queryKey:['restaurante',restauranteID],queryFn:()=> getRestauranteByID(restauranteID)});
   const { data: plato } = useQuery({queryKey:['plato',restauranteID],queryFn:()=> getPlatoRestauranteByID(restauranteID)});
 
-  console.log('restaurante:', restaurante);
-  console.log('plato:', plato);
+  // console.log('restaurante:', restaurante);
+  // console.log('plato:', plato);
   return (
     <View>
       {restaurante && plato ?(

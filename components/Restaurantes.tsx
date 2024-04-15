@@ -69,7 +69,6 @@ const Restaurantes = ({ restaurante }: Props) => {
               <Button
                 mode="contained"
                 style={styles.verMenuButton}
-                onPress={() => console.log("Ver menú")}
                 labelStyle={styles.verMenuButtonLabel} 
               >
                 Ver Menú

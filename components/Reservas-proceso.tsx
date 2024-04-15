@@ -1,42 +1,92 @@
-import React, { useState } from 'react';
+import React, {  useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, TextInput, Modal } from 'react-native';
 import Colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import ModalAlert from './ModalAlert';
 import { Calendar } from 'react-native-calendars';
-
-
-
+import { useMutation } from '@tanstack/react-query';
+import {  ReservaInsert, Restaurante, crearReserva } from '@/app/api/api';
+import { format } from 'date-fns';
 
 interface Horario {
   id: number;
   hora: string;
 }
+
 interface DayObject {
   dateString: string;
 }
-export default function Process() {
-  const horarios: Horario[] = [
-    { id: 5, hora: '1:00 pm' },
-    { id: 6, hora: '2:00 pm' },
-    { id: 7, hora: '3:00 pm' },
-    { id: 8, hora: '4:00 pm' },
-    { id: 9, hora: '5:00 pm' },
-  ];
+interface Props{
+  restaurant:Restaurante
+}
+const Process=({ restaurant }: Props) =>{
+
+function obtenerHoraActual(): number {
+  const ahora = new Date();
+  return ahora.getHours();
+}
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Establece la hora a las 00:00:00
+  const initialSelectedDate = today.toISOString().split('T')[0];
   const [selectedTime, setSelectedTime] = useState('');
   const [isBooking, setIsBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState<number | null>(null);
   const [showCalendar, setShowCalendar] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]); 
- 
+  const [selectedDate, setSelectedDate] = useState(initialSelectedDate);
+  function generarHorarios(): Horario[] {
+    const horaActual = obtenerHoraActual();
+    const horaCierreString = restaurant.horaCierre.split(' ');
+    const horaCierreNumero = parseInt(horaCierreString[0]);
+    const horaAperturaString = restaurant.horaApertura.split(' ');
+    const horaAperturaNumero = parseInt(horaAperturaString[0]);
+  
+    let horaCierre = horaCierreNumero; 
+    const horarios: Horario[] = [];
+    console.log("today",initialSelectedDate+" selectedDate",selectedDate)
+    if(selectedDate===initialSelectedDate){
+      for (let i = horaActual; i <= horaCierre; i += 0.5) {
+        const horas = Math.floor(i);
+        const minutos = i % 1 === 0.5 ? '30' : '00'; // Si el decimal es 0.5, los minutos son 30, de lo contrario, son 00
+        const hora = horas > 12 ? `${horas - 12}:${minutos} pm` : `${horas}:${minutos} am`;
+        const horario: Horario = { id: i, hora };
+        horarios.push(horario);
+        console.log("es hoy")
+      }
+    }else{
+      for (let i = horaAperturaNumero; i <= horaCierre; i += 0.5) {
+        const horas = Math.floor(i);
+        const minutos = i % 1 === 0.5 ? '30' : '00'; // Si el decimal es 0.5, los minutos son 30, de lo contrario, son 00
+        const hora = horas > 12 ? `${horas - 12}:${minutos} pm` : `${horas}:${minutos} am`;
+        const horario: Horario = { id: i, hora };
+        horarios.push(horario);
+      }
+    }
+    return horarios;
+  }
+  const horarios: Horario[] = generarHorarios();
+
+  
+  const reservaMutation=useMutation({    mutationFn: ({ reservacion }: { reservacion: ReservaInsert }) => crearReserva(reservacion),
+  onSuccess: () => {
+    setBookingSuccess(true);
+    setIsBooking(false);
+    setModalVisible(true); 
+    
+  },
+  onError: (error: Error) => {
+    setIsBooking(false);
+    setModalVisible(true); // Mostrar modal de error
+    console.error('Error al reservar:', error.message);
+  },
+  })
 
 
   const renderHorario = ({ item }: { item: Horario }) => {
     return (
-      <TouchableOpacity style={[styles.timeBtn, selectedTime==item.hora?{backgroundColor:Colors.red}:null]} onPress={()=>setSelectedTime(item.hora)}>
-        <Text style={[styles.textButton, selectedTime==item.hora?{color:"#fff"}:null]}>{item.hora}</Text>
+      <TouchableOpacity style={[styles.timeBtn, selectedTime == item.hora ? { backgroundColor: Colors.red } : null]} onPress={() => setSelectedTime(item.hora)}>
+        <Text style={[styles.textButton, selectedTime == item.hora ? { color: "#fff" } : null]}>{item.hora}</Text>
       </TouchableOpacity>
     );
   };
@@ -48,92 +98,110 @@ export default function Process() {
     setShowCalendar(false);
   }
   
-  const bookingConfirmed=()=>{
-    setIsBooking(true);
+ const bookingConfirmed=()=>{
     if(selectedTime===''||numberOfPeople===null){
       Alert.alert('Error', '¡Debe seleccionar una cantidad de personas y un horario!');
       setIsBooking(false);
+      return;
     }
-    else{
-      setTimeout(() => {
-        setIsBooking(false);
+    setIsBooking(false);
         setBookingSuccess(true);
-        setModalVisible(true);
-      }, 2000); 
+        const nuevaReserva = {
+          id_restaurante: restaurant.id,
+          id_usuario: 1,
+          fecha: selectedDate,
+          hora: selectedTime,
+          num_personas: numberOfPeople,
+        };
       
-    }
+        // Realizar la mutación
+        reservaMutation.mutate({ reservacion: nuevaReserva });
+        setModalVisible(true);
   }
-  
-  
+ 
+
   return (
-    <View style={{marginHorizontal:5, justifyContent:'center'}}>
-          <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginHorizontal:82, gap: 5, marginBottom: 10 }}>
-            <Ionicons name='calendar-outline' color={Colors.red} size={24} />
-            <Text style={[styles.smallText]}> Reserva para: {selectedDate}</Text>
-          </View>
+    <View style={{ flex: 1,  alignItems: 'center'}}>
+    <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginHorizontal: 82, marginBottom: 10 }}>
+      <Ionicons name='calendar-outline' color={Colors.red} size={24} />
+      <Text style={[styles.smallText]}>Reserva para: {selectedDate}</Text></View>
 
-          <TouchableOpacity style={styles.btnConsulta} onPress={handleShowCalendarPress}><Text style={[styles.textButton,{textAlign:'center', fontSize:17}]}>Selecciona otro día</Text></TouchableOpacity>
-      <Text style={[styles.styleSubHeadings, { marginTop: 5, marginBottom:5, }]}>¿Cuál es el tamaño del grupo?</Text>
-      <TextInput 
-        style={[styles.input,{textAlign:'center'}]}
-        onChangeText={text => {
-          const parsedValue = parseInt(text);
-          setNumberOfPeople(isNaN(parsedValue) || parsedValue===0 ? null : parsedValue);
-          console.log(numberOfPeople)
-        }}
-        value={numberOfPeople !== null ? numberOfPeople.toString() : ''}
-        placeholder="0"
-        keyboardType="numeric"
-        placeholderTextColor="#000" // Cambia el color del texto del placeholder aquí
-      />
-      <Text style={[styles.styleSubHeadings, { marginTop: 10, marginBottom:10, }]}>Hora de reserva</Text>
-      <FlatList horizontal={true} showsHorizontalScrollIndicator={false}
-        data={horarios} // Asigna los datos a la FlatList
-        renderItem={renderHorario} // Utiliza la función renderHorario para renderizar cada elemento
-      />
-      <View style={{padding:10}}>
-      <TouchableOpacity style={styles.buttonAppointment} onPress={bookingConfirmed}>
-      {isBooking ? (
-        <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={[styles.textButton,{textAlign:'center', fontSize:17, color:'#fff'}]}>Reservar</Text>
-          )}
-      </TouchableOpacity>
+    <TouchableOpacity style={styles.btnConsulta} onPress={handleShowCalendarPress}>
+      <Text style={[styles.textButton, { textAlign: 'center', fontSize: 17 }]}>Selecciona otro día</Text>
+    </TouchableOpacity>
+
+    <Text style={[styles.styleSubHeadings, { marginTop: 5, marginBottom: 5 }]}>¿Cuál es el tamaño del grupo?</Text>
+    <TextInput
+      style={[styles.input, { textAlign: 'center' }]}
+      onChangeText={text => {
+        const parsedValue = parseInt(text);
+        setNumberOfPeople(isNaN(parsedValue) || parsedValue === 0 ? null : parsedValue);
+        console.log(numberOfPeople)
+      }}
+      value={numberOfPeople !== null ? numberOfPeople.toString() : ''}
+      placeholder="0"
+      keyboardType="numeric"
+      placeholderTextColor="#000" // Cambia el color del texto del placeholder aquí
+    />
+
+    <Text style={[styles.styleSubHeadings, { marginTop: 10, marginBottom: 10 }]}>Hora de reserva</Text>
+
+    {horarios.length === 0 ? (
+      <View style={{ alignItems: 'center', display:'flex', flexDirection:'row' }}>
+        <Text style={{fontFamily:'appfont-light', color:Colors.grey, fontSize:16}}>No disponible, prueba seleccionar otro día</Text>
       </View>
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={showCalendar}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Calendar
-              minDate={new Date().toISOString().split('T')[0]} // Convertir la fecha actual a una cadena de texto en formato ISO8601
-              onDayPress={handleSelectDay}              
-              theme={{
-                arrowColor: Colors.wine,
-                backgroundColor: '#ffffff',
-                calendarBackground: '#ffffff',
-                textSectionTitleColor: '#b6c1cd',
-                selectedDayBackgroundColor: '#00adf5',
-                selectedDayTextColor: '#ffffff',
-                todayTextColor: Colors.wine,
-                dayTextColor: '#2d4150',
-              }}
-              markedDates={{
-                [selectedDate]: {selected: true, disableTouchEvent: true, selectedColor: Colors.red}
-              }}
-              current={selectedDate} 
+    ) : (
+      <FlatList
+        horizontal={true}
+        showsHorizontalScrollIndicator={false}
+        data={horarios}
+        renderItem={renderHorario}
+      />
+    )}
 
-            />
-              <TouchableOpacity style={styles.btnCloseCalendar} onPress={() => setShowCalendar(false)} ><Text style={{fontFamily:'appfont', color:Colors.white}}>Cancelar</Text></TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-      <ModalAlert visible={modalVisible}
-       setModalVisible={setModalVisible} />
+    <View style={{ padding: 10 }}>
+      <TouchableOpacity style={styles.buttonAppointment} onPress={bookingConfirmed}>
+        {isBooking ? (
+          <ActivityIndicator size="small" color="#fff" />
+        ) : (
+          <Text style={[styles.textButton, { textAlign: 'center', fontSize: 17, color: '#fff' }]}>Reservar</Text>
+        )}
+      </TouchableOpacity>
     </View>
+
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={showCalendar}
+      onRequestClose={() => setModalVisible(false)}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Calendar
+            minDate={initialSelectedDate} 
+            onDayPress={handleSelectDay}
+            theme={{
+              arrowColor: Colors.wine,
+              backgroundColor: '#ffffff',
+              calendarBackground: '#ffffff',
+              textSectionTitleColor: '#b6c1cd',
+              selectedDayBackgroundColor: '#00adf5',
+              selectedDayTextColor: '#ffffff',
+              todayTextColor: Colors.wine,
+              dayTextColor: '#2d4150',
+            }}
+            markedDates={{
+              [selectedDate]: { selected: true, disableTouchEvent: true, selectedColor: Colors.red }
+            }}
+            current={selectedDate}
+          />
+          <TouchableOpacity style={styles.btnCloseCalendar} onPress={() => setShowCalendar(false)} ><Text style={{ fontFamily: 'appfont', color: Colors.white }}>Cancelar</Text></TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+
+    <ModalAlert visible={modalVisible} setModalVisible={setModalVisible} />
+  </View>
   );
 }
 const styles = StyleSheet.create({
@@ -221,3 +289,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   }
 })
+export default Process;

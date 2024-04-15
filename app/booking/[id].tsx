@@ -25,18 +25,21 @@ const Booking = () => {
     })
     const {id}=useLocalSearchParams<{id:string}>();
     const idComoNumero = parseInt(id); 
-    const {data:restaurante}=useQuery({queryKey:['restaurante',idComoNumero], queryFn:()=>getRestauranteByID(idComoNumero)})
+    const { data: restaurante} = useQuery({queryKey:['restaurante',idComoNumero],queryFn:()=> getRestauranteByID(idComoNumero)});
 
   return (
     <View style={[defaultStyles.container]}>
       <Animated.ScrollView>
-        {restaurante? (      
-        <Info restaurant={restaurante}/>
+        {restaurante? (  
+          <View>
+            <Info restaurant={restaurante}/>
+            <ProcesoReserva restaurant={restaurante}/>
+          </View>    
       ):
       (<View style={defaultStyles.container}>
           <ActivityIndicator style={styles.spinner} size="large" color={Colors.dark} />
         </View>)}
-      <ProcesoReserva/>
+      
       </Animated.ScrollView>
     </View>
   )

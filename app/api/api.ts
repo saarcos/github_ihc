@@ -21,8 +21,16 @@ export  interface PlatoInsert {
   }
   
   // Interface para la tabla 'reserva'
-  interface Reserva {
+  export interface  Reserva {
     id: number;
+    id_restaurante: number;
+    id_usuario: number;
+    fecha: string;
+    hora: string;
+    num_personas: number;
+  }
+  // Interface para la tabla 'reserva'
+  export interface  ReservaInsert {
     id_restaurante: number;
     id_usuario: number;
     fecha: string;
@@ -40,8 +48,8 @@ export  interface PlatoInsert {
     direccion: string;
     foto: string;
     aforo: number;
-    hora_apertura: string;
-    hora_cierre: string;
+    horaApertura: string;
+    horaCierre: string;
   }
   
   interface Usuario {
@@ -51,6 +59,10 @@ export  interface PlatoInsert {
     telefono?: number;
     correo: string;
     password_usuario: string;
+  }
+  interface ServerResponse {
+    success: boolean;
+    message?: string;
   }
   export const getRestaurantes = async (): Promise<Restaurante[]> => {
     try {
@@ -141,6 +153,23 @@ export  interface PlatoInsert {
       }
     } catch (error) {
       throw new Error('Error al eliminar el plato.');
+    }
+  };
+  //Reservas
+  export const crearReserva = async (reserva: ReservaInsert): Promise<ServerResponse> => {
+    try {
+      const response: AxiosResponse<ServerResponse> = await axios.post(`${API_URL}/reservas`, reserva);
+      return response.data;
+    } catch (error: any) {
+      throw new Error('Error al crear la reserva: ' + error.message);
+    }
+  };
+  export const getReservas = async (): Promise<Reserva[]> => {
+    try {
+      const response: AxiosResponse<Reserva[]> = await axios.get(`${API_URL}/reservas`);
+      return response.data;
+    } catch (error:any) {
+      throw new Error('Error al obtener las reservas: ' + error.message);
     }
   };
   

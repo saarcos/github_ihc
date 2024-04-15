@@ -2,12 +2,12 @@ import { View, Text, StyleSheet, FlatList , Image} from 'react-native'
 import React, { useState } from 'react'
 import { Stack } from 'expo-router'
 import Colors from '@/constants/Colors'
-import reservas from '@/assets/data/reservas.json';
 import AppointmentCardItem from '@/components/AppointmentCardItem';
 import { defaultStyles } from '@/constants/Styles';
+import { useQuery } from '@tanstack/react-query';
+import { getReservas } from '../api/api';
 const Page = () => {
-  const [appointment, setAppointment] = useState(reservas);
-  
+  const{data:appointments}=useQuery({queryKey:['reservas'], queryFn:getReservas})  
   return (
     <View style={[defaultStyles.container,{padding:10}]}>
        <Stack.Screen
@@ -24,7 +24,7 @@ const Page = () => {
           },
         }}
       />
-      <FlatList data={appointment}
+      <FlatList data={appointments}
       renderItem={({item})=>(
         <AppointmentCardItem appointment={item}/>
       )} />
