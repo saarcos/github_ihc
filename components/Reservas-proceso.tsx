@@ -6,7 +6,6 @@ import ModalAlert from './ModalAlert';
 import { Calendar } from 'react-native-calendars';
 import { useMutation } from '@tanstack/react-query';
 import {  ReservaInsert, Restaurante, crearReserva } from '@/app/api/api';
-import { format } from 'date-fns';
 
 interface Horario {
   id: number;
@@ -68,7 +67,7 @@ function obtenerHoraActual(): number {
   const horarios: Horario[] = generarHorarios();
 
   
-  const reservaMutation=useMutation({    mutationFn: ({ reservacion }: { reservacion: ReservaInsert }) => crearReserva(reservacion),
+  const reservaMutation=useMutation({mutationFn: ({ reservacion }: { reservacion: ReservaInsert }) => crearReserva(reservacion),
   onSuccess: () => {
     setBookingSuccess(true);
     setIsBooking(false);
@@ -112,6 +111,7 @@ function obtenerHoraActual(): number {
           fecha: selectedDate,
           hora: selectedTime,
           num_personas: numberOfPeople,
+          estado:'confirmada'
         };
       
         // Realizar la mutación

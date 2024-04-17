@@ -28,6 +28,7 @@ export  interface PlatoInsert {
     fecha: string;
     hora: string;
     num_personas: number;
+    estado:string;
   }
   // Interface para la tabla 'reserva'
   export interface  ReservaInsert {
@@ -36,6 +37,7 @@ export  interface PlatoInsert {
     fecha: string;
     hora: string;
     num_personas: number;
+    estado:string;
   }
   
   // Interface para la tabla 'restaurante'
@@ -170,6 +172,18 @@ export  interface PlatoInsert {
       return response.data;
     } catch (error:any) {
       throw new Error('Error al obtener las reservas: ' + error.message);
+    }
+  };
+  export const eliminarReserva = async (id: number): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/reservas/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error al eliminar la reserva.');
+      }
+    } catch (error) {
+      throw new Error('Error al eliminar la reserva.');
     }
   };
   
