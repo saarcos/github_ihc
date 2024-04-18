@@ -162,10 +162,15 @@ export  interface PlatoInsert {
     try {
       const response: AxiosResponse<ServerResponse> = await axios.post(`${API_URL}/reservas`, reserva);
       return response.data;
-    } catch (error: any) {
-      throw new Error('Error al crear la reserva: ' + error.message);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw new Error('Error al crear la reserva: ' + error.message);
+      } else {
+        throw error;
+      }
     }
   };
+  
   export const getReservas = async (): Promise<Reserva[]> => {
     try {
       const response: AxiosResponse<Reserva[]> = await axios.get(`${API_URL}/reservas`);

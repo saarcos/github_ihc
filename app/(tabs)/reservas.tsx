@@ -1,15 +1,37 @@
-import { View, Text, StyleSheet, FlatList , Image} from 'react-native'
-import React, { useState } from 'react'
+import { RefreshControl, Text, StyleSheet, FlatList , Image} from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { Stack } from 'expo-router'
 import Colors from '@/constants/Colors'
 import AppointmentCardItem from '@/components/AppointmentCardItem';
 import { defaultStyles } from '@/constants/Styles';
 import { useQuery } from '@tanstack/react-query';
 import { getReservas } from '../api/api';
+import Animated from 'react-native-reanimated';
+import { useNavigation } from '@react-navigation/native';
+
+
 const Page = () => {
-  const{data:appointments}=useQuery({queryKey:['reservas'], queryFn:getReservas})  
+  const [refreshing, setRefreshing] = useState(false);
+  const{data:appointments, refetch}=useQuery({queryKey:['reservas'], queryFn:getReservas}) ;
+  const navigation=useNavigation();
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      refetch();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
   return (
-    <View style={[defaultStyles.container,{padding:10}]}>
+    <Animated.ScrollView style={[defaultStyles.container,{padding:10}]}
+    refreshControl={
+      <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={Colors.primary}/>
+    }
+    >
        <Stack.Screen
         options={{
           headerTitle: () => ( 
@@ -24,13 +46,10 @@ const Page = () => {
           },
         }}
       />
-      <FlatList data={appointments}
-      renderItem={({item})=>(
-        <AppointmentCardItem appointment={item}/>
-      )} />
-
-      
-    </View>
+       {appointments && appointments.reverse().map((item, index) => (
+        <AppointmentCardItem key={index} appointment={item} />
+      ))}
+    </Animated.ScrollView>
   )
 }
 const styles = StyleSheet.create({

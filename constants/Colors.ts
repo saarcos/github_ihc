@@ -10,4 +10,5 @@ export default{
   wine:'#803530',
   white:'#FFFFFF',
   appprueba:'#d09306',
+  confirmationGreen: '#5DBA80'
 }

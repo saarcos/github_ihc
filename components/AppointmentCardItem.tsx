@@ -39,7 +39,7 @@ const AppointmentCardItem = ({appointment}:Props) => {
                 fontSize: 15,
                 borderRadius:99,
                 padding:4,
-                backgroundColor: appointment.estado === 'confirmada' ?  '#8BC34A': Colors.orange,
+                backgroundColor: appointment.estado === 'confirmada' ?  Colors.confirmationGreen: Colors.orange,
               }}>{appointment.estado}</Text>
         </View>
         
@@ -67,7 +67,7 @@ const AppointmentCardItem = ({appointment}:Props) => {
 }
 const styles = StyleSheet.create({
   btnCancelarAppointment: {
-    backgroundColor: 'red', // Color de fondo del botón
+    backgroundColor: Colors.wine, // Color de fondo del botón
     paddingVertical: 5, // Espaciado vertical dentro del botón
     paddingHorizontal: 10, // Espaciado horizontal dentro del botón
     borderRadius: 5, // Radio de borde para hacerlo redondeado

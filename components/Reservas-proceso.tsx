@@ -34,6 +34,8 @@ function obtenerHoraActual(): number {
   const [numberOfPeople, setNumberOfPeople] = useState<number | null>(null);
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(initialSelectedDate);
+  const [errorModalVisible, setErrorModalVisible] = useState(false); 
+
   function generarHorarios(): Horario[] {
     const horaActual = obtenerHoraActual();
     const horaCierreString = restaurant.horaCierre.split(' ');
@@ -43,7 +45,6 @@ function obtenerHoraActual(): number {
   
     let horaCierre = horaCierreNumero; 
     const horarios: Horario[] = [];
-    console.log("today",initialSelectedDate+" selectedDate",selectedDate)
     if(selectedDate===initialSelectedDate){
       for (let i = horaActual; i <= horaCierre; i += 0.5) {
         const horas = Math.floor(i);
@@ -51,7 +52,6 @@ function obtenerHoraActual(): number {
         const hora = horas > 12 ? `${horas - 12}:${minutos} pm` : `${horas}:${minutos} am`;
         const horario: Horario = { id: i, hora };
         horarios.push(horario);
-        console.log("es hoy")
       }
     }else{
       for (let i = horaAperturaNumero; i <= horaCierre; i += 0.5) {
@@ -76,8 +76,7 @@ function obtenerHoraActual(): number {
   },
   onError: (error: Error) => {
     setIsBooking(false);
-    setModalVisible(true); // Mostrar modal de error
-    console.error('Error al reservar:', error.message);
+    setErrorModalVisible(true);
   },
   })
 
@@ -116,7 +115,6 @@ function obtenerHoraActual(): number {
       
         // Realizar la mutación
         reservaMutation.mutate({ reservacion: nuevaReserva });
-        setModalVisible(true);
   }
  
 
@@ -136,7 +134,6 @@ function obtenerHoraActual(): number {
       onChangeText={text => {
         const parsedValue = parseInt(text);
         setNumberOfPeople(isNaN(parsedValue) || parsedValue === 0 ? null : parsedValue);
-        console.log(numberOfPeople)
       }}
       value={numberOfPeople !== null ? numberOfPeople.toString() : ''}
       placeholder="0"
@@ -201,6 +198,25 @@ function obtenerHoraActual(): number {
     </Modal>
 
     <ModalAlert visible={modalVisible} setModalVisible={setModalVisible} />
+    <Modal
+      visible={errorModalVisible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={() => setErrorModalVisible(false)}
+    >
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+        <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%', alignItems: 'center' }}>
+          <View style={{ backgroundColor: Colors.red, padding: 10, borderRadius: 5, marginBottom: 15, width: '100%', alignItems: 'center' }}>
+            <Text style={{ fontSize: 18, color: 'white' }}>Error en la Reserva</Text>
+          </View>
+          <Text style={{ fontSize: 16, marginBottom: 20, textAlign: 'center' }}>Lo sentimos, no se pudo completar la reserva en este momento. Por favor, inténtalo de nuevo más tarde.</Text>
+          <TouchableOpacity onPress={() => setErrorModalVisible(false)} style={{ backgroundColor: Colors.red, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 5 }}>
+            <Text style={{ color: 'white', fontSize: 16 }}>Cerrar</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+</Modal>
+
   </View>
   );
 }
