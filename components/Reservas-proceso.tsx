@@ -209,7 +209,7 @@ function obtenerHoraActual(): number {
           <View style={{ backgroundColor: Colors.red, padding: 10, borderRadius: 5, marginBottom: 15, width: '100%', alignItems: 'center' }}>
             <Text style={{ fontSize: 18, color: 'white' }}>Error en la Reserva</Text>
           </View>
-          <Text style={{ fontSize: 16, marginBottom: 20, textAlign: 'center' }}>Lo sentimos, no se pudo completar la reserva en este momento. Por favor, inténtalo de nuevo más tarde.</Text>
+          <Text style={{ fontSize: 16, marginBottom: 20, textAlign: 'center' }}>Lo sentimos, no se pudo completar la reserva para la hora especificada. Por favor, inténtalo con otro horario.</Text>
           <TouchableOpacity onPress={() => setErrorModalVisible(false)} style={{ backgroundColor: Colors.red, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 5 }}>
             <Text style={{ color: 'white', fontSize: 16 }}>Cerrar</Text>
           </TouchableOpacity>

@@ -1,5 +1,5 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native'
-import React from 'react'
+import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, ActivityIndicator} from 'react-native'
+import React, { useState } from 'react'
 import Colors from '@/constants/Colors';
 import moment from 'moment'; 
 import { Ionicons } from '@expo/vector-icons';
@@ -7,23 +7,51 @@ import { Reserva, eliminarReserva, getRestauranteByID } from '@/app/api/api';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 interface Props{
-    appointment:Reserva   
+    appointment:Reserva,
+    onReservaDeleted: () => void
+
 }
-const AppointmentCardItem = ({appointment}:Props) => {
+const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
   const { data: restaurante} = useQuery({queryKey:['restauranteEncontrado',appointment.id_restaurante],queryFn:()=> getRestauranteByID(appointment.id_restaurante)});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const deleteMutation=useMutation({mutationFn: ({ idReserva }: { idReserva: number }) => eliminarReserva(idReserva),
   onSuccess: () => {
     console.log('Reserva eliminada corectamente');
+    setShowDeleteModal(false);
+    onReservaDeleted(); 
   },
   onError: (error: Error) => { 
     console.error('Error al eliminarReserva:', error.message);
   },
   })
   const handleEliminarReserva=()=>{
-    deleteMutation.mutate({idReserva: appointment.id});
+    setShowDeleteModal(true);
   }
+  const confirmarEliminacion = () => {
+    deleteMutation.mutate({ idReserva: appointment.id });
+  };
+  const fechaActual = new Date().toISOString().slice(0, 10);
+  const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  
+  
+  // Convertir la hora de la reserva a un formato comparable
+  const horaReserva = moment(appointment.hora, ['h:mm A']).format('HH:mm');
+  
+  // Comparar la fecha y la hora actual con la fecha y la hora de la reserva
+  let reservaEsFutura = false;
+  
+  if (appointment.fecha > fechaActual) {
+    reservaEsFutura = true; 
+  } else if (appointment.fecha === fechaActual) {
+    // Si la fecha de la reserva es igual a la fecha actual, entonces comparamos las horas
+    if (horaReserva > horaActual) {
+      reservaEsFutura = true; // Si la hora de la reserva es posterior a la hora actual, entonces la reserva es futura
+    }
+  }
+
+
   return (
-    <View style={styles.card}>
+  <View style={[styles.card, reservaEsFutura ? null : styles.reservaPasada]}>
       <View style={{justifyContent:'space-between', flexDirection:'row', alignItems:'center'}}>
         <Text style={{fontSize:18, fontFamily:'appfont-semi', marginTop:10}}>Fecha: {appointment.fecha}</Text>
         <Text style={{fontFamily:'appfont-light', color:Colors.wine, fontSize:15}}>{appointment.hora}</Text>
@@ -57,15 +85,88 @@ const AppointmentCardItem = ({appointment}:Props) => {
                 <Ionicons name='people' size={20} color={Colors.red}/>
                 <Text style={{width:'78%',fontFamily:'appfont-light'}}>{appointment.num_personas}</Text>
             </View>
-            <View style={{alignSelf: 'flex-start',marginTop: 10}}>
+            {reservaEsFutura &&(<View style={{alignSelf: 'flex-start',marginTop: 10}}>
               <TouchableOpacity style={styles.btnCancelarAppointment} onPress={handleEliminarReserva}><Text style={styles.btnText}>Cancelar Reserva</Text></TouchableOpacity>
-            </View>
+            </View>)}
         </View>
       </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showDeleteModal}
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View style={[styles.centeredView,{backgroundColor: 'rgba(0, 0, 0, 0.5)'}] } >
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>¿Estás seguro de que deseas eliminar esta reserva?</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, gap:10 }}>
+
+              <TouchableOpacity  onPress={() => setShowDeleteModal(false)} style={[styles.btnVolver,]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons name="arrow-back" size={20} color="black" style={{ marginRight: 5 }} />
+                  <Text style={styles.modalBtnsText}>Regresar</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={confirmarEliminacion} style={styles.btnEliminar}>
+                  {deleteMutation.isPending ? (
+                    <ActivityIndicator color={Colors.white} /> // Muestra el spinner si la mutación está en curso
+                  ) : (
+                    <Text style={[styles.modalBtnsText, { color: Colors.white }]}>Eliminar</Text> // Muestra "Eliminar" cuando no hay operación en curso
+                  )}
+              </TouchableOpacity>            
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   )
 }
 const styles = StyleSheet.create({
+  btnVolver:{
+    padding:10,
+    borderRadius:99,
+    borderWidth: 1,
+    borderColor: 'black',
+  },
+  btnEliminar:{
+    backgroundColor:Colors.wine,
+    padding:10,
+    borderRadius:99,
+  },
+  modalBtnsText:{
+    fontFamily:'appfont-bold',
+    fontSize:16,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    fontSize: 16,
+    fontFamily: 'appfont-semi',
+  },
+  reservaPasada: {
+    opacity: 0.5, // Esto reducirá la opacidad de las reservas pasadas para mostrarlas como desactivadas
+  },
   btnCancelarAppointment: {
     backgroundColor: Colors.wine, // Color de fondo del botón
     paddingVertical: 5, // Espaciado vertical dentro del botón

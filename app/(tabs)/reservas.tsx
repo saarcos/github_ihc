@@ -19,13 +19,36 @@ const Page = () => {
     await refetch();
     setRefreshing(false);
   };
+  const handleReservaDeleted = () => {
+    refetch();
+  };
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       refetch();
     });
-
     return unsubscribe;
   }, [navigation]);
+  // Ordenar las reservas por fecha de más nuevas a más antiguas
+  const sortedAppointments = appointments
+  ? appointments.sort((a, b) => {
+      const dateComparison = new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
+        if (dateComparison === 0) {
+        // Extraer las horas de las citas
+        const horaA = parseInt(a.hora.split(':')[0]);
+        const horaB = parseInt(b.hora.split(':')[0]);
+
+        // Comparar por hora
+        return horaB - horaA;
+      }
+      return dateComparison;
+    })
+  : [];
+
+  const today = new Date().toISOString().slice(0, 10); // Obtiene la fecha de hoy en el formato YYYY-MM-DD
+
+  const appointmentsToday = sortedAppointments.filter(item => {
+    return item.fecha >= today;
+  });
   return (
     <Animated.ScrollView style={[defaultStyles.container,{padding:10}]}
     refreshControl={
@@ -46,8 +69,8 @@ const Page = () => {
           },
         }}
       />
-       {appointments && appointments.reverse().map((item, index) => (
-        <AppointmentCardItem key={index} appointment={item} />
+       {appointmentsToday && appointmentsToday.map((item, index) => (
+        <AppointmentCardItem key={index} appointment={item} onReservaDeleted={handleReservaDeleted} />
       ))}
     </Animated.ScrollView>
   )
