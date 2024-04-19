@@ -20,15 +20,14 @@ interface Props{
 }
 const Process=({ restaurant }: Props) =>{
 
-function obtenerHoraActual(): number {
-  const ahora = new Date();
-  return ahora.getHours();
-}
+// function obtenerHoraActual(): number {
+//   const ahora = new Date();
+//   return ahora.getHours();
+// }
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Establece la hora a las 00:00:00
   const initialSelectedDate = today.toISOString().split('T')[0];
   const [selectedTime, setSelectedTime] = useState('');
-  const [isBooking, setIsBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState<number | null>(null);
@@ -37,21 +36,30 @@ function obtenerHoraActual(): number {
   const [errorModalVisible, setErrorModalVisible] = useState(false); 
 
   function generarHorarios(): Horario[] {
-    const horaActual = obtenerHoraActual();
+    const ahora = new Date();
+    const horaActual = ahora.getHours();
+    const minutosActuales = ahora.getMinutes();
     const horaCierreString = restaurant.horaCierre.split(' ');
     const horaCierreNumero = parseInt(horaCierreString[0]);
     const horaAperturaString = restaurant.horaApertura.split(' ');
     const horaAperturaNumero = parseInt(horaAperturaString[0]);
-  
+    console.log(horaActual)
     let horaCierre = horaCierreNumero; 
     const horarios: Horario[] = [];
     if(selectedDate===initialSelectedDate){
-      for (let i = horaActual; i <= horaCierre; i += 0.5) {
-        const horas = Math.floor(i);
-        const minutos = i % 1 === 0.5 ? '30' : '00'; // Si el decimal es 0.5, los minutos son 30, de lo contrario, son 00
-        const hora = horas > 12 ? `${horas - 12}:${minutos} pm` : `${horas}:${minutos} am`;
-        const horario: Horario = { id: i, hora };
-        horarios.push(horario);
+      for (let i = horaActual; i <= horaCierre; i++) {
+        for (let j = 0; j < 60; j += 30) {
+          if (i === horaActual && j < minutosActuales) {
+            continue; // Saltar los minutos pasados para la hora actual
+          }
+  
+          const horas = i > 12 ? i - 12 : i;
+          const am_pm = i >= 12 ? 'pm' : 'am';
+          const minutos = j === 0 ? '00' : j.toString();
+          const hora = `${horas}:${minutos} ${am_pm}`;
+          const horario: Horario = { id: i + j / 100, hora };
+          horarios.push(horario);
+        }
       }
     }else{
       for (let i = horaAperturaNumero; i <= horaCierre; i += 0.5) {
@@ -70,12 +78,10 @@ function obtenerHoraActual(): number {
   const reservaMutation=useMutation({mutationFn: ({ reservacion }: { reservacion: ReservaInsert }) => crearReserva(reservacion),
   onSuccess: () => {
     setBookingSuccess(true);
-    setIsBooking(false);
     setModalVisible(true); 
     
   },
   onError: (error: Error) => {
-    setIsBooking(false);
     setErrorModalVisible(true);
   },
   })
@@ -99,10 +105,8 @@ function obtenerHoraActual(): number {
  const bookingConfirmed=()=>{
     if(selectedTime===''||numberOfPeople===null){
       Alert.alert('Error', '¡Debe seleccionar una cantidad de personas y un horario!');
-      setIsBooking(false);
       return;
     }
-    setIsBooking(false);
         setBookingSuccess(true);
         const nuevaReserva = {
           id_restaurante: restaurant.id,
@@ -158,7 +162,7 @@ function obtenerHoraActual(): number {
 
     <View style={{ padding: 10 }}>
       <TouchableOpacity style={styles.buttonAppointment} onPress={bookingConfirmed}>
-        {isBooking ? (
+        {reservaMutation.isPending ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
           <Text style={[styles.textButton, { textAlign: 'center', fontSize: 17, color: '#fff' }]}>Reservar</Text>
