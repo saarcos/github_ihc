@@ -9,6 +9,7 @@ export default{
   red: '#E5332A',
   wine:'#803530',
   white:'#FFFFFF',
+  colorprueba: 'black',
   appprueba:'#d09306',
   confirmationGreen: '#5DBA80'
 }
