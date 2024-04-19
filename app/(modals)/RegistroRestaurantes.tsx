@@ -2,19 +2,18 @@ import React, { useState, useLayoutEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Alert } from 'react-native';
 import { defaultStyles } from '@/constants/Styles';
 import RNPickerSelect from 'react-native-picker-select';
-import { useLocalSearchParams, useNavigation } from 'expo-router';
+import { router, useLocalSearchParams, useNavigation } from 'expo-router';
 import { Svg, Path, Defs, LinearGradient, Stop, Image } from 'react-native-svg';
-import { Link} from 'expo-router'; // Importa Link desde expo-router
+import { Link } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { getAuth, createUserWithEmailAndPassword} from 'firebase/auth';
 import {initializeApp} from 'firebase/app';
 import {firebaseConfig} from 'firebase-config';
 
 const Registro: React.FC = () => {
-  const [usuario, setUsuario] = useState('');
-
-  const [apellido, setApellido] = useState('');
-  const [telefono, setTelefono] = useState('');
+  const [nombreRestaurante, setNombreRestaurante] = useState<string>('');
+  const [direccion, setDireccion] = useState<string>('');
+  const [telefono, setTelefono] = useState<string>('');
   const [email, setCorreo] = useState('');
   const [password, setContraseña] = useState('');
   const [passwordMatch, setConfirmarContraseña] = useState('');
@@ -42,25 +41,23 @@ const Registro: React.FC = () => {
     })
   }
 
-  const validarUsuario = (text: string) => {
-    if (!/^[a-zA-Z]+$/.test(text.trim())) {
-      setErrors(prevErrors => ({ ...prevErrors, usuario: 'El nombre debe contener solo letras' }));
+  const validarNombreRestaurante = (text: string) => {
+    if (!text.trim()) {
+      setErrors(prevErrors => ({ ...prevErrors, nombreRestaurante: 'El nombre del restaurante es requerido' }));
     } else {
-      setErrors(prevErrors => ({ ...prevErrors, usuario: '' }));
+      setErrors(prevErrors => ({ ...prevErrors, nombreRestaurante: '' }));
     }
-    setUsuario(text);
+    setNombreRestaurante(text);
   };
 
-  const validarApellido = (text: string) => {
-    if (!/^[a-zA-Z]+$/.test(text.trim())) {
-      setErrors(prevErrors => ({ ...prevErrors, apellido: 'El apellido debe contener solo letras' }));
+  const validarDireccion = (text: string) => {
+    if (!text.trim()) {
+      setErrors(prevErrors => ({ ...prevErrors, direccion: 'La dirección es requerida' }));
     } else {
-      setErrors(prevErrors => ({ ...prevErrors, apellido: '' }));
+      setErrors(prevErrors => ({ ...prevErrors, direccion: '' }));
     }
-    setApellido(text);
+    setDireccion(text);
   };
-
-
 
   const validarTelefono = (text: string) => {
     if (!/^\d+$/.test(text.trim())) {
@@ -81,8 +78,8 @@ const Registro: React.FC = () => {
   };
 
   const validarContraseña = (text: string) => {
-    if (text.trim().length < 6) {
-      setErrors(prevErrors => ({ ...prevErrors, contraseña: 'La contraseña debe tener al menos 6 caracteres' }));
+    if (text.trim().length < 8) {
+      setErrors(prevErrors => ({ ...prevErrors, contraseña: 'La contraseña debe tener al menos 8 caracteres' }));
     } else {
       setErrors(prevErrors => ({ ...prevErrors, contraseña: '' }));
     }
@@ -96,6 +93,27 @@ const Registro: React.FC = () => {
       setErrors(prevErrors => ({ ...prevErrors, confirmarContraseña: '' }));
     }
     setConfirmarContraseña(text);
+  };
+
+  const handleRegistro2 = () => {
+    router.back
+  }
+  const handleRegistro = () => {
+    // Aquí puedes realizar la validación final antes de enviar el formulario
+    // Esta función se llamará cuando el usuario presione el botón de registro
+
+    // Simulando una validación exitosa
+    if (nombreRestaurante && direccion && telefono && email && password && showPassword) {
+      // Si todas las validaciones pasan, mostrar el mensaje de ingreso exitoso
+      Alert.alert(
+        'Ingreso exitoso',
+        '¡Tu registro ha sido exitoso!',
+        [
+          { text: 'Aceptar', onPress: () => console.log('Registro exitoso') }
+        ],
+        { cancelable: false }
+      );
+    }
   };
 
   const toggleMostrarContraseña = () => {
@@ -116,9 +134,9 @@ const Registro: React.FC = () => {
         <Path
           fill="url(#a)"
           d="M0 361.705V0h500v361.705c-209.843 105.578-420.768 43.991-500 0Z"
-        
+
         />
-      
+   
         <Defs>
           <LinearGradient
             id="a"
@@ -143,41 +161,39 @@ const Registro: React.FC = () => {
       </Svg>
     );
   };
-
   return (
     <View style={styles.container}>
-      <View style={styles.container1}>
+       <View style={styles.container1}>
         <SvgTop />
       </View>
-
       <KeyboardAvoidingView style={styles.formContainer} behavior="padding">
         <ScrollView>
-          <Text style={styles.label}>Nombre:</Text>
+          <Text style={styles.label}>Nombre de Restaurante:</Text>
           <View style={styles.inputContainer}>
             <View style={styles.inputWrapper}>
-              <Ionicons name="person-circle" size={20} color="#777" style={styles.icon} />
+              <Ionicons name="restaurant" size={20} color="#777" style={styles.icon} />
               <TextInput
                 style={styles.input}
-                placeholder="Nombre"
-                onChangeText={validarUsuario}
-                value={usuario}
+                placeholder="Nombre de Restaurante"
+                onChangeText={validarNombreRestaurante}
+                value={nombreRestaurante}
               />
             </View>
           </View>
-          {errors.usuario && <Text style={styles.errorText}>{errors.usuario}</Text>}
-          <Text style={styles.label}>Apellido:</Text>
+          {errors.nombreRestaurante && <Text style={styles.errorText}>{errors.nombreRestaurante}</Text>}
+          <Text style={styles.label}>Dirección:</Text>
           <View style={styles.inputContainer}>
             <View style={styles.inputWrapper}>
-              <Ionicons name="person-circle" size={20} color="#777" style={styles.icon} />
+              <Ionicons name="location-outline" size={20} color="#777" style={styles.icon} />
               <TextInput
                 style={styles.input}
-                placeholder="Apellido"
-                onChangeText={validarApellido}
-                value={apellido}
+                placeholder="Dirección"
+                onChangeText={validarDireccion}
+                value={direccion}
               />
             </View>
           </View>
-          {errors.apellido && <Text style={styles.errorText}>{errors.apellido}</Text>}
+          {errors.direccion && <Text style={styles.errorText}>{errors.direccion}</Text>}
           <Text style={styles.label}>Teléfono:</Text>
           <View style={styles.inputContainer}>
             <View style={styles.inputWrapper}>
@@ -187,13 +203,11 @@ const Registro: React.FC = () => {
                 placeholder="Teléfono"
                 onChangeText={validarTelefono}
                 value={telefono}
-                maxLength={10}
-                keyboardType="phone-pad" // Aquí establecemos el tipo de teclado como teléfono
+                keyboardType="phone-pad"
               />
             </View>
           </View>
           {errors.telefono && <Text style={styles.errorText}>{errors.telefono}</Text>}
-          
           <Text style={styles.label}>Correo:</Text>
           <View style={styles.inputContainer}>
             <View style={styles.inputWrapper}>
@@ -216,7 +230,7 @@ const Registro: React.FC = () => {
                 placeholder="Contraseña"
                 onChangeText={validarContraseña}
                 value={password}
-                secureTextEntry={!showPassword} // Usa secureTextEntry basado en mostrarContraseña
+                secureTextEntry={!showPassword}
               />
               <TouchableOpacity onPress={toggleMostrarContraseña}>
                 <Ionicons
@@ -238,7 +252,7 @@ const Registro: React.FC = () => {
                 placeholder="Confirmar Contraseña"
                 onChangeText={validarConfirmarContraseña}
                 value={passwordMatch}
-                secureTextEntry={!showPasswordMatch} // Usa secureTextEntry basado en mostrarContraseña
+                secureTextEntry={!showPasswordMatch}
               />
               <TouchableOpacity onPress={toggleMostrarConfirmarContraseña}>
                 <Ionicons
@@ -251,9 +265,9 @@ const Registro: React.FC = () => {
             </View>
           </View>
           {errors.confirmarContraseña && <Text style={styles.errorText}>{errors.confirmarContraseña}</Text>}
-            <TouchableOpacity style={[defaultStyles.btn, { alignItems: 'center', justifyContent: 'center', alignContent: 'center' }]} onPress={createAccount}>
+          <TouchableOpacity style={[defaultStyles.btn, { alignItems: 'center', justifyContent: 'center', alignContent: 'center' }]} onPress={createAccount}>
               <Text style={{ color: 'white', fontSize: 16 }}>Registrarse</Text>
-            </TouchableOpacity>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -318,9 +332,9 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#E5332A',
     padding: 10,
-    borderRadius: 10,
-    marginRight: 45,
-    marginLeft: 45
+    borderRadius: 15,
+    marginRight: 20,
+    marginLeft: 30
   },
   buttonText: {
     color: 'black',
@@ -354,7 +368,5 @@ const pickerSelectStyles = StyleSheet.create({
 
   },
 });
-
-
 
 export default Registro;
