@@ -44,11 +44,19 @@ const Page = () => {
     })
   : [];
 
-  const today = new Date().toISOString().slice(0, 10); // Obtiene la fecha de hoy en el formato YYYY-MM-DD
-
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0'); // El mes se indexa desde 0
+  const day = String(today.getDate()).padStart(2, '0');
+  
+  const todayFormatted = `${year}-${month}-${day}`;
   const appointmentsToday = sortedAppointments.filter(item => {
-    return item.fecha >= today;
+    return item.fecha >= todayFormatted;
   });
+  useEffect(() => {
+    console.log("Fecha: ",todayFormatted)
+  }, [])
+  
   return (
     <Animated.ScrollView style={[defaultStyles.container,{padding:10}]}
     refreshControl={
