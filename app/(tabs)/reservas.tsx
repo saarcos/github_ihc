@@ -53,10 +53,10 @@ const Page = () => {
   const appointmentsToday = sortedAppointments.filter(item => {
     return item.fecha >= todayFormatted;
   });
-  useEffect(() => {
-    console.log("Fecha: ",todayFormatted)
-  }, [])
-  
+  // useEffect(() => {
+  //   console.log("Fecha: ",todayFormatted)
+  // }, [])
+
   return (
     <Animated.ScrollView style={[defaultStyles.container,{padding:10}]}
     refreshControl={
