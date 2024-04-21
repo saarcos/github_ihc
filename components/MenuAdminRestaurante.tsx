@@ -22,7 +22,10 @@ interface Props {
 
 
 const MenuAdminRestaurante = ({ plato }: Props) => {
-    
+
+  useEffect(() => {
+  }, [plato]); 
+
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
     const platoArray = Array.isArray(plato) ? plato : [plato];
     
@@ -46,15 +49,17 @@ const MenuAdminRestaurante = ({ plato }: Props) => {
                     </View>
                     );
                 })}
-                <Link href={`/editarPlato/${null}`} asChild>
-              <Button
-                mode="contained"
-                style={styles.verMenuButton}
-                labelStyle={styles.verMenuButtonLabel} 
-              >
-                Añadir Plato
-              </Button>
-              </Link>
+                <View style={{alignItems:'center'}}>
+                  <Link href={`/editarPlato/${null}`} asChild>
+                    <Button
+                      mode="contained"
+                      style={styles.verMenuButton}
+                      labelStyle={styles.verMenuButtonLabel} 
+                    >
+                      Añadir Plato
+                    </Button>
+                </Link>
+                </View>
       </Animated.ScrollView>
     
   );
@@ -120,16 +125,20 @@ const styles = StyleSheet.create({
         flexDirection:'row',
       },
       verMenuButton: {
-        borderRadius: 10,
-        backgroundColor: Colors.red,
+        borderRadius: 90,
+        borderWidth:1,
+        borderColor:'red',
+        backgroundColor: "white",
+        color:'red',
         justifyContent: 'center',
         alignItems: 'center',
         width: 250, 
-        height: 40,
+        height: 45,
         marginRight: 10,
       },
       
       verMenuButtonLabel: {
+        color:'red',
         fontSize: 14, 
         fontFamily: 'appfont-bold',
       },

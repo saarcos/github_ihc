@@ -1,5 +1,5 @@
 import React, { useLayoutEffect,useState } from 'react';
-import { Image } from 'react-native';
+import { Image  } from 'react-native';
 import { View, SafeAreaView, StyleSheet, Text } from 'react-native';
 import { TouchableRipple } from 'react-native-paper';
 import { FontAwesome } from '@expo/vector-icons';
@@ -8,43 +8,24 @@ import { Svg, Path, Defs, LinearGradient, Stop} from 'react-native-svg';
 import Colors from '@/constants/Colors'
 import { useNavigation } from 'expo-router';
 import { Link, useRouter } from 'expo-router';
+import { Button } from 'react-native-paper';
+import { useQuery } from '@tanstack/react-query';
+import {getPlatoRestauranteByID } from '../api/api';
+import MenuAdminRestaurante from '@/components/MenuAdminRestaurante';
 
 
 const perfil: React.FC = () => {
-  function SvgTop() {
-    return (
-      <Svg
-        width={500}
-        height={100}
-        fill="none"
-      >
-        <Path
-          fill="url(#a)"
-          d="M0 100V0h500v100C266.166 42.824 69.236 76.177 0 100Z"
-        />
-        <Defs>
-          <LinearGradient
-            id="a"
-            x1={250}
-            x2={250}
-            y1={278.5}
-            y2={28}
-            gradientUnits="userSpaceOnUse"
-          >
-            <Stop stopColor="#E5332A" />
-            <Stop offset={0.12} stopColor="#BB342C" />
-            <Stop offset={1} stopColor="#803530" />
-          </LinearGradient>
-        </Defs>
-      </Svg>
-    );
-  }
+
 
   const router = useRouter();
 
     const handleRegisterPress = () => {
       router.back();
     };
+    // const {id}=useLocalSearchParams<{id:string}>();
+    const idComoNumero = 6; 
+    const { data: plato } = useQuery({queryKey:['plato',idComoNumero],queryFn:()=> getPlatoRestauranteByID(idComoNumero)});
+  
   
   const navigation=useNavigation();
     useLayoutEffect(()=>{
@@ -58,18 +39,21 @@ const perfil: React.FC = () => {
         headerTitleStyle: styles.headerTitle,
         headerShadowVisible: false,
         headerStyle: {
-          backgroundColor: '#803530', 
+          backgroundColor: '#E5332A', 
         },
       })
     })
 
   return (
-    <SafeAreaView style={styles.container}>
-      <SvgTop/>
+    <SafeAreaView >
       <View style={styles.info}>
         <View style={{ flexDirection: 'row', marginTop: 15 }}>
-          <View style={{ marginLeft: 20 }}>
-            <Text style={[styles.titulo, { marginTop: 15, marginBottom: 5 }]}>Ingreso Comidas</Text>
+          <View >
+              {plato ? (
+                <MenuAdminRestaurante plato={plato} />
+              ) : (
+                <Text>No se encontró ningún restaurante con el ID proporcionado.</Text>
+              )}
           </View>
         </View>
       </View>
@@ -82,9 +66,7 @@ const perfil: React.FC = () => {
 export default perfil;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+
   info: {
     paddingHorizontal: 30,
     marginBottom: 25,

@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, TouchableOpacity, Text, Platform, Image } from 'react-native';
+import React, { useState  } from 'react';
+import { View, TextInput, Button, StyleSheet, TouchableOpacity, Text, Platform, Image  } from 'react-native';
 import { Feather, MaterialIcons, FontAwesome,AntDesign  } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker'; // Para Expo
 import { Plato ,editarPlato , insertarPlato } from '@/app/api/api';
 import Id from '@/app/editarPlato/[id]';
+import { storage } from '@/firebase-config';
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+
+import firebase from 'firebase/app';
+import { Link, useRouter} from 'expo-router'; 
 
 
 interface Props {
@@ -12,9 +17,14 @@ interface Props {
 }
 
 const RegEditPlato = ({ plato , idRestaurante }: Props) => {
+
+
+
   const [nombre, setNombre] = useState(plato?.nombre || '');
   const [precio, setPrecio] = useState(plato?.precio.toString() || '');
   const [foto, setFoto] = useState(plato?.foto || '');
+
+
 
   const handleNombreChange = (text: string) => {
     setNombre(text);
@@ -24,31 +34,51 @@ const RegEditPlato = ({ plato , idRestaurante }: Props) => {
     setPrecio(text);
   };
 
-  const handleFotoChange = (text: string) => {
-    setFoto(text);
-  };
 
-  const tomarFotoDesdeGaleria = async () => {
-    if (Platform.OS !== 'web') {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
-        alert('Se requieren permisos para acceder a la galería.');
-        return;
-      }
-    }
 
+  async function pickImage() {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [3, 4],
       quality: 1,
     });
-    console.log(result)
-    if (!result.canceled && result.assets[0].uri) {
-        setFoto(result.assets[0].uri);
-      }
-  };
 
+    if (!result.canceled) {
+      setFoto(result.assets[0].uri);
+      // upload the image
+      await uploadImage(result.assets[0].uri);
+    }
+  }
+  async function uploadImage(uri : string) {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+
+    const storageRef = ref(storage, "Img/" + new Date().getTime());
+    const uploadTask = uploadBytesResumable(storageRef, blob);
+
+    // listen for events
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log("Upload is " + progress + "% done");
+      },
+      (error) => {
+        // handle error
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+          console.log("File available at", downloadURL);
+          // save record
+          setFoto(downloadURL);
+        });
+      }
+    );
+  }
+  
+  const router = useRouter();
 
   const handleEditarPlato = async () => {
     try {
@@ -63,7 +93,7 @@ const RegEditPlato = ({ plato , idRestaurante }: Props) => {
         id_restaurante: idRestaurante,
         nombre: nombre,
         precio: parseFloat(precio),
-        foto: plato?.foto || ""
+        foto: foto
       };
 
       plato ? await editarPlato(plato.id, modificarPlato) : await insertarPlato(nuevoPlatoInsert);
@@ -73,6 +103,7 @@ const RegEditPlato = ({ plato , idRestaurante }: Props) => {
     setNombre('');
     setPrecio('');
     setFoto('');
+    router.back();
   };
 
 
@@ -85,12 +116,12 @@ const RegEditPlato = ({ plato , idRestaurante }: Props) => {
       </View>
       {plato?<View style={{ height: 200, margin: 20, position: 'relative' }}>
                 {foto ? <Image source={{ uri: foto }} style={{ width: 230, height: 200 }} /> : null}
-                <TouchableOpacity style={[styles.btnCamera, { position: 'absolute', bottom: 0, right: 0 ,margin:10}]} onPress={tomarFotoDesdeGaleria}>
+                <TouchableOpacity style={[styles.btnCamera, { position: 'absolute', bottom: 0, right: 0 ,margin:10}]} onPress={pickImage}>
                     <AntDesign name="camera" size={24} color="white" />
                 </TouchableOpacity>
             </View> :
             <View style={{margin:20}}>
-                {foto ? <Image source={{ uri: foto }} style={{ width: 230, height: 200 }} /> : <TouchableOpacity style={styles.btnCameraPlus} onPress={tomarFotoDesdeGaleria}>
+                {foto ? <Image source={{ uri: foto }} style={{ width: 230, height: 200 }} /> : <TouchableOpacity style={styles.btnCameraPlus} onPress={pickImage} >
                     <MaterialIcons name="add-a-photo" size={94} color="gray" />
                 </TouchableOpacity>}
                 

@@ -13,7 +13,7 @@ const DrawerLayout = () => {
 		<GestureHandlerRootView style={{ flex: 1 }}>
 			<Tabs screenOptions={{
 				tabBarActiveTintColor: Colors.appprueba,
-				tabBarStyle: { backgroundColor: Colors.wine },
+				tabBarStyle: { backgroundColor: Colors.red },
 				tabBarLabelStyle: { fontSize: 12 },
 				tabBarInactiveTintColor: '#fff',
 
@@ -21,7 +21,8 @@ const DrawerLayout = () => {
 				<Tabs.Screen
 					name="index"
 					options={{
-						tabBarActiveTintColor:"#d09306",
+						tabBarActiveTintColor:"red",
+						tabBarActiveBackgroundColor: "white",
 						tabBarLabel:'Restaurantes',
 						tabBarIcon:({color,size})=><Ionicons name='restaurant' color={color} size={size}/>
 					}
@@ -32,7 +33,8 @@ const DrawerLayout = () => {
 				<Tabs.Screen
 					name="perfil"
 					options={{
-						tabBarActiveTintColor:"#d09306",
+						tabBarActiveTintColor:"red",
+						tabBarActiveBackgroundColor: "white",
 						tabBarLabel:'Perfil',
 						tabBarIcon:({color,size})=><Ionicons name='person-circle-outline' color={color} size={size}/>
 					}
@@ -43,7 +45,8 @@ const DrawerLayout = () => {
 				<Tabs.Screen
 					name="reservas"
 					options={{
-						tabBarActiveTintColor:"#d09306",
+						tabBarActiveTintColor:"red",
+						tabBarActiveBackgroundColor: "white",
 						tabBarLabel:'Reservas',
 						tabBarIcon:({color,size})=><Ionicons name='calendar-outline' color={color} size={size}/>
 					}
@@ -54,7 +57,8 @@ const DrawerLayout = () => {
 				<Tabs.Screen
 					name="adminPerfil"
 					options={{
-						tabBarActiveTintColor:"#d09306",
+						tabBarActiveTintColor:"red",
+						tabBarActiveBackgroundColor: "white",
 						tabBarLabel:'Perfil',
 						tabBarIcon:({color,size})=><Ionicons name='person-circle-outline' color={color} size={size}/>
 					}
@@ -65,9 +69,10 @@ const DrawerLayout = () => {
 				<Tabs.Screen
 					name="adminIngreso"
 					options={{
-						tabBarActiveTintColor:"#d09306",
-						tabBarLabel:'Ingreso',
-						tabBarIcon:({color,size})=><Ionicons name='person-circle-outline' color={color} size={size}/>
+						tabBarActiveTintColor:"red",
+						tabBarActiveBackgroundColor: "white",
+						tabBarLabel:'Platos',
+						tabBarIcon:({color,size})=><Ionicons name='restaurant' color={color} size={size}/>
 					}
 				}
 					redirect={authState?.role !== Role.ADMIN}
@@ -76,7 +81,8 @@ const DrawerLayout = () => {
 				<Tabs.Screen
 					name="adminVista"
 					options={{
-						tabBarActiveTintColor:"#d09306",
+						tabBarActiveTintColor:"red",
+						tabBarActiveBackgroundColor: "white",
 						tabBarLabel:'Vista',
 						tabBarIcon:({color,size})=><Ionicons name='person-circle-outline' color={color} size={size}/>
 					}
@@ -84,7 +90,6 @@ const DrawerLayout = () => {
 					redirect={authState?.role !== Role.ADMIN}
 				/>
 	
-
 			</Tabs>
 
 
