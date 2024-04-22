@@ -83,7 +83,7 @@ const Page = () => {
 			const user = userCredential.user;
 			setCurrentUser(user);
 			router.push({ pathname: '/(tabs)/perfil'});
-			onLogin!('admin', 'admin');
+			onLogin!('user', 'user');
 			setEmail('');
 			setPassword('');
 		  })

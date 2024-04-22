@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity,Image, Dimensions } from 'react-native';
 import {  Text, IconButton, Button ,  } from 'react-native-paper';
 import { BtnReserva , BtnUbicacion } from "./Button";
+import { EvilIcons } from '@expo/vector-icons';
+
 import Card from "./Card";
 import { Link } from 'expo-router';
 import Colors from '@/constants/Colors';
@@ -71,10 +73,24 @@ const MenuRestaurante = ({ restaurante, plato }: Props) => {
                 <View style={styles.overlay}>
                     <Text style={styles.text}>{restaurante.nombre}</Text>
                     <View style={styles.btnContainer}>
-                    <Link href={`/booking/${restaurante.id}`} asChild>
-                        <TouchableOpacity style={styles.btnReserva}><Text style={{color:'#fff', fontFamily:'appfont-bold', fontSize:15}}>Reservar</Text></TouchableOpacity>
-                    </Link>
-                        <BtnUbicacion text="" color='#E4E4E5'/>
+                        <Link href={`/booking/${restaurante.id}`} asChild>
+                            <TouchableOpacity style={styles.btnReserva}><Text style={{color:'#fff', fontFamily:'appfont-bold', fontSize:15}}>Reservar</Text></TouchableOpacity>
+                        </Link>
+                        
+                        <Link href={`/mapa/${restaurante.id}`} asChild>
+                                <TouchableOpacity
+                                  style={{
+                                      ...styles.btnUbicacion,
+                                  }}
+                                  activeOpacity={0.7}
+                              >
+                                  <Text style={{ color: 'black'}}>
+                                      <EvilIcons name="location" size={24} color="black" />
+                                  </Text>
+                              </TouchableOpacity>
+                        </Link>
+
+
                     </View>
                 </View>
                 <View style={styles.strellasContainer}>
@@ -176,6 +192,14 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         flexDirection:'row',
       },
+      btnUbicacion: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 10,
+        width: 40,
+        height: 40,
+        backgroundColor:'#E4E4E5'
+    },
 });
 
 export default MenuRestaurante;
