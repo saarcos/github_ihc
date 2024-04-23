@@ -22,6 +22,21 @@ const CLERK_PUBLISHABLE_KEY=process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
 
 
 const StackLayout = () => {
+	const [loaded, error] = useFonts({
+		'appfont':require('../assets/fonts/Outfit-Regular.ttf'),
+		'appfont-bold':require('../assets/fonts/Outfit-Bold.ttf'),
+		'appfont-semi':require('../assets/fonts/Outfit-SemiBold.ttf'),
+		'appfont-light':require('../assets/fonts/Outfit-Light.ttf'),
+	  });
+	  useEffect(() => {
+		if (error) throw error;
+	  }, [error]);
+	
+	  useEffect(() => {
+		if (loaded) {
+		  SplashScreen.hideAsync();
+		}
+	  }, [loaded]);
 	const { authState } = useAuth();
 	const segments = useSegments();
 	const router = useRouter();
