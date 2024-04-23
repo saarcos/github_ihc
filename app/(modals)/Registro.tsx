@@ -4,23 +4,30 @@ import { defaultStyles } from '@/constants/Styles';
 import RNPickerSelect from 'react-native-picker-select';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { Svg, Path, Defs, LinearGradient, Stop, Image } from 'react-native-svg';
-import { Link} from 'expo-router'; // Importa Link desde expo-router
+import { Link, useRouter} from 'expo-router'; // Importa Link desde expo-router
 import { Ionicons } from '@expo/vector-icons';
 import { getAuth, createUserWithEmailAndPassword} from 'firebase/auth';
 import {initializeApp} from 'firebase/app';
 import {firebaseConfig} from 'firebase-config';
+import { Usuario , insertarUsuario } from '@/app/api/api';
 
-const Registro: React.FC = () => {
-  const [usuario, setUsuario] = useState('');
+interface Props {
+  usuario?: Usuario;
+}
 
-  const [apellido, setApellido] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [email, setCorreo] = useState('');
-  const [password, setContraseña] = useState('');
-  const [passwordMatch, setConfirmarContraseña] = useState('');
+const Registro = ({ usuario}: Props) => {
+
+  const router = useRouter();
+  const [nombre, setUsuario] = useState(usuario?.nombre|| '');
+  const [apellido, setApellido] = useState(usuario?.apellido|| '');
+  const [telefono, setTelefono] = useState(usuario?.telefono ? usuario.telefono.toString() : '');
+  const [email, setCorreo] = useState(usuario?.correo|| '');
+  const [password, setContraseña] = useState(usuario?.password_usuario|| '');
+  const [passwordMatch, setConfirmarContraseña] = useState(usuario?.password_usuario|| '');
   const [showPassword, setMostrarContraseña] = useState<boolean>(false);
   const [showPasswordMatch, setMostrarConfirmarContraseña] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
 
   const navigation=useNavigation();
   useLayoutEffect(()=>{
@@ -41,6 +48,30 @@ const Registro: React.FC = () => {
       Alert.alert(error);
     })
   }
+  
+  const handleCrearUsuario = async () => {
+    try {
+      const insertarUser = {
+        nombre: nombre,
+        apellido: apellido,
+        telefono: parseFloat(telefono),
+        correo: email,
+        password_usuario: password
+      };
+      insertarUsuario(insertarUser);
+
+      createAccount();
+      Alert.alert('Usuario creado');
+
+    } catch (error: any) {
+      if (typeof error === 'string') {
+        Alert.alert('Error al crear el usuario:', error);
+      } else {
+        Alert.alert('Error al crear el usuario:', 'Se produjo un error desconocido.');
+      }
+    }
+    router.back();
+  };
 
   const validarUsuario = (text: string) => {
     if (!/^[a-zA-Z]+$/.test(text.trim())) {
@@ -81,8 +112,8 @@ const Registro: React.FC = () => {
   };
 
   const validarContraseña = (text: string) => {
-    if (text.trim().length < 6) {
-      setErrors(prevErrors => ({ ...prevErrors, contraseña: 'La contraseña debe tener al menos 6 caracteres' }));
+    if (text.trim().length < 7) {
+      setErrors(prevErrors => ({ ...prevErrors, contraseña: 'La contraseña debe tener al menos 7 caracteres' }));
     } else {
       setErrors(prevErrors => ({ ...prevErrors, contraseña: '' }));
     }
@@ -160,7 +191,7 @@ const Registro: React.FC = () => {
                 style={styles.input}
                 placeholder="Nombre"
                 onChangeText={validarUsuario}
-                value={usuario}
+                value={nombre}
               />
             </View>
           </View>
@@ -251,7 +282,7 @@ const Registro: React.FC = () => {
             </View>
           </View>
           {errors.confirmarContraseña && <Text style={styles.errorText}>{errors.confirmarContraseña}</Text>}
-            <TouchableOpacity style={[defaultStyles.btn, { alignItems: 'center', justifyContent: 'center', alignContent: 'center' }]} onPress={createAccount}>
+            <TouchableOpacity style={[defaultStyles.btn, { alignItems: 'center', justifyContent: 'center', alignContent: 'center' }]} onPress={handleCrearUsuario}>
               <Text style={{ color: 'white', fontSize: 16 }}>Registrarse</Text>
             </TouchableOpacity>
         </ScrollView>
