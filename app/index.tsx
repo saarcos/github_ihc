@@ -70,28 +70,45 @@ const Page = () => {
 	const app = initializeApp(firebaseConfig);
 	const auth = getAuth(app);
 
-	const SignIn = () => {
-
+	const SignIn = async () => {
 		const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-	
+		let autenticacion = false;
 		if (!emailValid.test(email) || password.length < 6) {
 		  Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 6 caracteres');
 		  return;
 		}
-		signInWithEmailAndPassword(auth, email, password)
-		  .then((userCredential) => {
-			const user = userCredential.user;
-			setCurrentUser(user);
-			router.push({ pathname: '/(tabs)/perfil'});
-			onLogin!('user', 'user');
-			setEmail('');
-			setPassword('');
-		  })
-		  .catch(error => {
-			let errorMessage = 'Correo electrónico o contraseña incorrectos';
-			Alert.alert(errorMessage);
-		  })
-	}
+		try {
+		  // Hacer una solicitud al backend para verificar si el correo pertenece a un restaurante o usuario
+		  const response = await fetch(`http://192.168.100.67:3000/verificarCorreo/${email}`);
+		  const data = await response.json();
+	
+		  if (data.esRestaurante) {
+			autenticacion = true;
+		  } else if (data.esUsuario) {
+			autenticacion = false;
+		  } else {
+			console.log('El correo no está registrado');
+		  }
+		  signInWithEmailAndPassword(auth, email, password)
+			.then((userCredential) => {
+				const user = userCredential.user;
+				setCurrentUser(user);
+				router.push({ pathname: '/(tabs)/perfil'});
+				if(autenticacion)
+					onLogin!('admin', 'admin');
+				else
+					onLogin!('user', 'user');
+				setEmail('');
+				setPassword('');
+			})
+			.catch(error => {
+				let errorMessage = 'Correo electrónico o contraseña incorrectos';
+				Alert.alert(errorMessage);
+			})
+		} catch (error) {
+		  Alert.alert('Error', 'Ocurrió un error al verificar el correo. Por favor, inténtalo de nuevo más tarde.');
+		}
+	};
 
 	return (
 		<KeyboardAvoidingView
