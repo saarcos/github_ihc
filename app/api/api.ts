@@ -53,8 +53,21 @@ export  interface PlatoInsert {
     horaApertura: string;
     horaCierre: string;
   }
-  
-  interface Usuario {
+
+  export interface RestauranteInsert {
+    categoria_id: number;
+    nombre: string;
+    correo: string;
+    password_restaurante: string;
+    direccion: string;
+    foto: string;
+    aforo: number;
+    horaApertura: string;
+    horaCierre: string;
+  }
+
+  // Interface para la tabla 'usuario'
+  export interface Usuario {
     id: number;
     nombre?: string;
     apellido?: string;
@@ -62,6 +75,15 @@ export  interface PlatoInsert {
     correo: string;
     password_usuario: string;
   }
+
+  export interface UsuarioInsert {
+    nombre?: string;
+    apellido?: string;
+    telefono?: number;
+    correo: string;
+    password_usuario: string;
+  }
+
   interface ServerResponse {
     success: boolean;
     message?: string;
@@ -192,4 +214,36 @@ export  interface PlatoInsert {
     }
   };
   
-  
+  export const insertarUsuario = async ( nuevoUsuario: UsuarioInsert): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/usuario/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevoUsuario),
+      });
+      if (!response.ok) {
+        throw new Error('Error al CREAR el usuario.');
+      }
+    } catch (error) {
+      throw new Error('Error al CREAR el usuario.');
+    }
+  };
+
+  export const insertarRestaurante = async ( nuevoRestaurante: RestauranteInsert): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/restaurantes/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevoRestaurante),
+      });
+      if (!response.ok) {
+        throw new Error('Error al CREAR el restaurante.');
+      }
+    } catch (error) {
+      throw new Error('Error al CREAR el restaurante.');
+    }
+  };
