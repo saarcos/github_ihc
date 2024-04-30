@@ -247,3 +247,17 @@ export  interface PlatoInsert {
       throw new Error('Error al CREAR el restaurante.');
     }
   };
+
+  export const verificarCorreo = async (correo: string): Promise<{ esRestaurante: boolean, esUsuario: boolean }> => {
+    try {
+      const response = await fetch(`${API_URL}/verificarCorreo/${correo}`);
+      if (!response.ok) {
+        throw new Error('Error al verificar el usuario');
+      }
+      return await response.json();
+    } catch (error) {
+      throw new Error('Error al verificar el usuario');
+    }
+  };
+
+

@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getAuth, signInWithEmailAndPassword, User } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../firebase-config';
+import { verificarCorreo } from '@/app/api/api';
 
 const Page = () => {
 	const router = useRouter();
@@ -71,40 +72,33 @@ const Page = () => {
 	const auth = getAuth(app);
 
 	const SignIn = async () => {
-		const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		let autenticacion = false;
-		if (!emailValid.test(email) || password.length < 6) {
-		  Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 6 caracteres');
-		  return;
-		}
 		try {
-		  // Hacer una solicitud al backend para verificar si el correo pertenece a un restaurante o usuario
-		  const response = await fetch(`http://192.168.100.67:3000/verificarCorreo/${email}`);
-		  const data = await response.json();
-	
-		  if (data.esRestaurante) {
-			autenticacion = true;
-		  } else if (data.esUsuario) {
-			autenticacion = false;
-		  } else {
-			console.log('El correo no está registrado');
+		  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		  // Validar el formato del correo electrónico y la longitud de la contraseña
+		  if (!emailValid.test(email) || password.length < 6) {
+			Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 6 caracteres');
+			return;
 		  }
+		  const { esRestaurante, esUsuario } = await verificarCorreo(email);
 		  signInWithEmailAndPassword(auth, email, password)
 			.then((userCredential) => {
-				const user = userCredential.user;
-				setCurrentUser(user);
-				router.push({ pathname: '/(tabs)/perfil'});
-				if(autenticacion)
-					onLogin!('admin', 'admin');
-				else
-					onLogin!('user', 'user');
-				setEmail('');
-				setPassword('');
+			  const user = userCredential.user;
+			  setCurrentUser(user);
+			  router.push({ pathname: '/(tabs)/perfil'});
+			  if (esRestaurante) {
+				onLogin!('admin', 'admin');
+			  } else if (esUsuario) {
+				onLogin!('user', 'user');
+			  } else {
+				console.log('El correo no está registrado');
+			  }
+			  setEmail('');
+			  setPassword('');
 			})
 			.catch(error => {
-				let errorMessage = 'Correo electrónico o contraseña incorrectos';
-				Alert.alert(errorMessage);
-			})
+			  let errorMessage = 'Correo electrónico o contraseña incorrectos';
+			  Alert.alert(errorMessage);
+			});
 		} catch (error) {
 		  Alert.alert('Error', 'Ocurrió un error al verificar el correo. Por favor, inténtalo de nuevo más tarde.');
 		}
