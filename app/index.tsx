@@ -123,7 +123,7 @@ const Page = () => {
 				<TextInput
 					onChangeText={(text) => setEmail(text)}
 					style={styles.input}
-					placeholder="usuario@gmail.com"
+					placeholder="usuario@email.com"
 				/>
 				<TextInput
 					onChangeText={(text) => setPassword(text)}
