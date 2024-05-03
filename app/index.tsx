@@ -6,10 +6,17 @@ import { Link, router, useRouter } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { defaultStyles } from '@/constants/Styles';
 import { Ionicons } from '@expo/vector-icons';
-import { getAuth, signInWithEmailAndPassword, User } from 'firebase/auth';
+import { getAuth, signInWithEmailAndPassword, User, initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../firebase-config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { verificarCorreo } from '@/app/api/api';
+
+const app = initializeApp(firebaseConfig);
+
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage)
+});
 
 const Page = () => {
 	const router = useRouter();
@@ -67,9 +74,6 @@ const Page = () => {
 	const [password, setPassword] = useState('');
 	const { onLogin } = useAuth();
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
-  
-	const app = initializeApp(firebaseConfig);
-	const auth = getAuth(app);
 
 	const SignIn = async () => {
 		try {
