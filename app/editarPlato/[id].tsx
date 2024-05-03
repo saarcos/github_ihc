@@ -9,7 +9,7 @@ import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useQuery } from '@tanstack/react-query';
 import { getPlatoByID } from '../api/api';
-
+import LoadingSpinner from '@/components/LoadingSpinner';
 const Page = () =>{
   const navigation=useNavigation();
   useLayoutEffect(() => {
@@ -30,11 +30,15 @@ const Page = () =>{
   const {idRestaurante}=useLocalSearchParams<{idRestaurante:string}>();
   const idComoNumero = parseInt(id); 
   const idRestauranteComoNumero = 6; 
-  const { data: plato} = useQuery({queryKey:['plato',idComoNumero],queryFn:()=> getPlatoByID(idComoNumero)});
-
-
-  console.log(plato);
+  const { data: plato, isLoading } = useQuery({
+    queryKey: ['plato', idComoNumero],
+    queryFn: () => getPlatoByID(idComoNumero)
+  });
   
+  if (isLoading || !plato) {
+    // Aquí puedes mostrar un mensaje de carga o cualquier otra cosa mientras se obtienen los datos
+    return <LoadingSpinner />;
+  }
 
 
 

@@ -5,6 +5,8 @@ import { BtnReserva , BtnUbicacion } from "./Button";
 import CardAdmin from "./CardAdmin";
 import { Link } from 'expo-router';
 import { Plato  } from '@/app/api/api';
+import { getPlatoRestauranteByID } from '@/app/api/api';
+import { useQuery } from '@tanstack/react-query';
 
 import Colors from '@/constants/Colors';
 import Animated, {
@@ -26,8 +28,15 @@ const MenuAdminRestaurante = ({ plato }: Props) => {
   useEffect(() => {
   }, [plato]); 
 
+    
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
+    const idComoNumero = plato.id_restaurante; 
+      const { data: platos } = useQuery({queryKey:['plato',idComoNumero],queryFn:()=> getPlatoRestauranteByID(idComoNumero)});
+      console.log(platos)
+
     const platoArray = Array.isArray(plato) ? plato : [plato];
+
+
     
   return (
     
