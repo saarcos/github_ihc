@@ -2,10 +2,10 @@ import React, {  useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, TextInput, Modal } from 'react-native';
 import Colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import ModalAlert from './ModalAlert';
 import { Calendar } from 'react-native-calendars';
 import { useMutation } from '@tanstack/react-query';
 import {  ReservaInsert, Restaurante, crearReserva } from '@/app/api/api';
+import { Link } from 'expo-router';
 
 interface Horario {
   id: number;
@@ -20,21 +20,16 @@ interface Props{
 }
 const Process=({ restaurant }: Props) =>{
 
-// function obtenerHoraActual(): number {
-//   const ahora = new Date();
-//   return ahora.getHours();
-// }
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Establece la hora a las 00:00:00
   const initialSelectedDate = today.toISOString().split('T')[0];
   const [selectedTime, setSelectedTime] = useState('');
-  const [bookingSuccess, setBookingSuccess] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [numberOfPeople, setNumberOfPeople] = useState<number | null>(null);
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(initialSelectedDate);
   const [errorModalVisible, setErrorModalVisible] = useState(false); 
-
+  const [disponibilidadModal, setDisponibilidadModal] = useState(false)
   function generarHorarios(): Horario[] {
     const ahora = new Date();
     const horaActual = ahora.getHours();
@@ -43,11 +38,11 @@ const Process=({ restaurant }: Props) =>{
     const horaCierreNumero = parseInt(horaCierreString[0]);
     const horaAperturaString = restaurant.horaApertura.split(' ');
     const horaAperturaNumero = parseInt(horaAperturaString[0]);
-    console.log(horaActual)
+    
     let horaCierre = horaCierreNumero; 
     const horarios: Horario[] = [];
     if(selectedDate===initialSelectedDate){
-      for (let i = horaActual; i <= horaCierre; i++) {
+      for (let i = horaActual; i < horaCierre; i++) {
         for (let j = 0; j < 60; j += 30) {
           if (i === horaActual && j < minutosActuales) {
             continue; // Saltar los minutos pasados para la hora actual
@@ -77,7 +72,6 @@ const Process=({ restaurant }: Props) =>{
   
   const reservaMutation=useMutation({mutationFn: ({ reservacion }: { reservacion: ReservaInsert }) => crearReserva(reservacion),
   onSuccess: () => {
-    setBookingSuccess(true);
     setModalVisible(true); 
     
   },
@@ -107,26 +101,44 @@ const Process=({ restaurant }: Props) =>{
       Alert.alert('Error', '¡Debe seleccionar una cantidad de personas y un horario!');
       return;
     }
-        setBookingSuccess(true);
-        const nuevaReserva = {
-          id_restaurante: restaurant.id,
-          id_usuario: 1,
-          fecha: selectedDate,
-          hora: selectedTime,
-          num_personas: numberOfPeople,
-          estado:'confirmada'
-        };
-      
-        // Realizar la mutación
-        reservaMutation.mutate({ reservacion: nuevaReserva });
+    if (horarios.findIndex(horario => horario.hora === selectedTime) < 4) {
+      setDisponibilidadModal(true);
+    } else {
+      const nuevaReserva = {
+        id_restaurante: restaurant.id,
+        id_usuario: 1,
+        fecha: selectedDate,
+        hora: selectedTime,
+        num_personas: numberOfPeople,
+        estado:'confirmada'
+      };
+      // Realizar la mutación
+      reservaMutation.mutate({ reservacion: nuevaReserva });
+    }   
   }
+  const confirmarDisponibilidad = () => {
+    setDisponibilidadModal(false);
+    if(selectedTime===''||numberOfPeople===null){
+      Alert.alert('Error', '¡Debe seleccionar una cantidad de personas y un horario!');
+      return;
+    }
+    const nuevaReserva = {
+      id_restaurante: restaurant.id,
+      id_usuario: 1,
+      fecha: selectedDate,
+      hora: selectedTime,
+      num_personas: numberOfPeople,
+      estado:'pendiente'
+    };
+    // Realizar la mutación
+    reservaMutation.mutate({ reservacion: nuevaReserva });  };
  
 
   return (
     <View style={{ flex: 1,  alignItems: 'center'}}>
     <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', marginHorizontal: 82, marginBottom: 10 }}>
       <Ionicons name='calendar-outline' color={Colors.red} size={24} />
-      <Text style={[styles.smallText]}>Reserva para: {selectedDate}</Text></View>
+      <Text style={[styles.smallText]}> Reserva para: {selectedDate}</Text></View>
 
     <TouchableOpacity style={styles.btnConsulta} onPress={handleShowCalendarPress}>
       <Text style={[styles.textButton, { textAlign: 'center', fontSize: 17 }]}>Selecciona otro día</Text>
@@ -200,8 +212,59 @@ const Process=({ restaurant }: Props) =>{
         </View>
       </View>
     </Modal>
-
-    <ModalAlert visible={modalVisible} setModalVisible={setModalVisible} />
+    <Modal
+        animationType="slide"
+        transparent={true}
+        visible={disponibilidadModal}
+        onRequestClose={() => setDisponibilidadModal(false)}
+      >
+        <View style={[styles.centeredView,{backgroundColor: 'rgba(0, 0, 0, 0.5)'}] } >
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>¿Está seguro de que desea confirmar disponibilidad? </Text>
+            <Text style={{fontFamily:'appfont-light', color:Colors.grey, fontSize:14}}>Esta acción no confirmará una reserva </Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, gap:10 }}>
+            <TouchableOpacity  onPress={() => setDisponibilidadModal(false)} style={[styles.btnVolver]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Ionicons name="arrow-back" size={20} color="black" style={{ marginRight: 5 }} />
+                  <Text style={styles.modalBtnsText}>Regresar</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={confirmarDisponibilidad} style={styles.btnEliminar}>
+                  {reservaMutation.isPending ? (
+                    <ActivityIndicator color={Colors.white} /> // Muestra el spinner si la mutación está en curso
+                  ) : (
+                    <Text style={[styles.modalBtnsText, { color: Colors.white }]}>Consultar</Text> // Muestra "Eliminar" cuando no hay operación en curso
+                  )}
+              </TouchableOpacity> 
+              
+           
+            </View>
+          </View>
+        </View>
+      </Modal>     
+    <Modal
+        animationType="fade" // Fundido
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          setModalVisible(false);
+        }}
+      >
+        <View style={[styles.centeredView,{backgroundColor: 'rgba(0, 0, 0, 0.5)'}]}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>¡Reserva registrada exitosamente!</Text>
+            <Link href={'/(protected)/reservas'} asChild>
+            <TouchableOpacity
+              style={{ ...styles.btnEliminar, backgroundColor: Colors.red }}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.textStyle}>Aceptar</Text>
+            </TouchableOpacity>
+            </Link>
+            
+          </View>
+        </View>
+      </Modal>
     <Modal
       visible={errorModalVisible}
       transparent={true}
@@ -210,11 +273,11 @@ const Process=({ restaurant }: Props) =>{
     >
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
         <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%', alignItems: 'center' }}>
-          <View style={{ backgroundColor: Colors.red, padding: 10, borderRadius: 5, marginBottom: 15, width: '100%', alignItems: 'center' }}>
-            <Text style={{ fontSize: 18, color: 'white' }}>Error en la Reserva</Text>
+          <View style={{  padding:10,width: '100%', alignItems: 'center' }}>
+            <Text style={styles.modalText}>Error en la Reserva</Text>
           </View>
-          <Text style={{ fontSize: 16, marginBottom: 20, textAlign: 'center' }}>Lo sentimos, no se pudo completar la reserva para la hora especificada. Por favor, inténtalo con otro horario.</Text>
-          <TouchableOpacity onPress={() => setErrorModalVisible(false)} style={{ backgroundColor: Colors.red, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 5 }}>
+          <Text style={{ fontSize: 16, marginBottom: 20}}>Lo sentimos, no se pudo completar la reserva. Por favor, inténtalo con otro horario.</Text>
+          <TouchableOpacity onPress={() => setErrorModalVisible(false)} style={styles.btnEliminar}>
             <Text style={{ color: 'white', fontSize: 16 }}>Cerrar</Text>
           </TouchableOpacity>
         </View>
@@ -225,6 +288,48 @@ const Process=({ restaurant }: Props) =>{
   );
 }
 const styles = StyleSheet.create({
+  btnVolver:{
+    padding:10,
+    borderRadius:99,
+    borderWidth: 1,
+    borderColor: 'black',
+  },
+  btnEliminar:{
+    backgroundColor:Colors.red,
+    padding:10,
+    borderRadius:99,
+  },
+  modalBtnsText:{
+    fontFamily:'appfont-bold',
+    fontSize:16,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+    fontSize: 16,
+    fontFamily: 'appfont-semi',
+  },
   timeBtn:{
     borderWidth:1.5,
     borderRadius:99,
@@ -232,7 +337,7 @@ const styles = StyleSheet.create({
     paddingHorizontal:20,
     alignItems:'center',
     marginRight:6,
-    borderColor:Colors.wine
+    borderColor:Colors.red
   },
   peopleBtn:{
     borderWidth:1.5,
@@ -243,7 +348,7 @@ const styles = StyleSheet.create({
     paddingHorizontal:20,
     alignItems:'center',
     marginRight:6,
-    borderColor:Colors.wine,
+    borderColor:Colors.red,
     borderRadius:20
   },
   textButton:{
@@ -271,7 +376,7 @@ const styles = StyleSheet.create({
   },
   btnConsulta:{
     borderWidth:1,
-    borderColor:Colors.wine,
+    borderColor:Colors.red,
     padding:10,
     marginHorizontal:50,
   },
@@ -289,7 +394,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     paddingHorizontal: 30,
     backgroundColor: '#fff',
-    borderColor:Colors.wine,
+    borderColor:Colors.red,
     borderWidth:2,
     maxWidth:200,
     marginHorizontal:80,
@@ -307,6 +412,16 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 30,
     alignItems: 'center',
-  }
+  },
+  openButton: {
+    backgroundColor: "#F194FF",
+    borderRadius: 20,
+    padding: 10
+  },
+  textStyle: {
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center"
+  },
 })
 export default Process;

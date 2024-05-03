@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Svg, Path, Defs, LinearGradient, Stop, Image } from 'react-native-svg';
-import {Text, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View, Alert} from 'react-native';
+import {Text, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View, Alert,ScrollView} from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { Link, router, useRouter } from 'expo-router';
 import Colors from '@/constants/Colors';
@@ -87,7 +87,7 @@ const Page = () => {
 			.then((userCredential) => {
 			  const user = userCredential.user;
 			  setCurrentUser(user);
-			  router.push({ pathname: '/(tabs)/perfil'});
+			  router.push({ pathname: '/(protected)/perfil'});
 			  if (esRestaurante) {
 				onLogin!('admin', 'admin');
 			  } else if (esUsuario) {
@@ -108,8 +108,8 @@ const Page = () => {
 	};
 
 	return (
-		<KeyboardAvoidingView
-
+		<ScrollView>
+			<KeyboardAvoidingView
 			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 			style={styles.container}
 		>
@@ -164,8 +164,9 @@ const Page = () => {
 					<Text style={styles.btnText}>Registrarse como Restaurante</Text>
 				</TouchableOpacity>
 			</View>
-
 		</KeyboardAvoidingView>
+		</ScrollView>
+		
 	);
 };
 

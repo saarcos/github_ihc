@@ -30,8 +30,12 @@ const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
   const confirmarEliminacion = () => {
     deleteMutation.mutate({ idReserva: appointment.id });
   };
-  const fechaActual = new Date().toISOString().slice(0, 10);
-  const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0'); // El mes se indexa desde 0
+  const day = String(today.getDate()).padStart(2, '0');
+  
+  const fechaActual = `${year}-${month}-${day}`;  const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   
   
   // Convertir la hora de la reserva a un formato comparable
@@ -48,6 +52,7 @@ const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
       reservaEsFutura = true; // Si la hora de la reserva es posterior a la hora actual, entonces la reserva es futura
     }
   }
+  // console.log("Fecha Actual: ",fechaActual+" Fecha del appointment: ",appointment.fecha)
 
 
   return (
