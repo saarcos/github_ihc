@@ -132,6 +132,18 @@ export  interface PlatoInsert {
       throw new Error('Error al obtener los platos con el id');
     }
   };
+  export const getUsuarioByEmail = async (email: string): Promise<Usuario> => {
+    try {
+      const response = await fetch(`${API_URL}/usuarios/${email}`);
+      if (!response.ok) {
+        throw new Error('Error al obtener los platos.');
+      }
+      const data = await response.json();
+      return data as Usuario;
+    } catch (error) {
+      throw new Error('Error al obtener los platos con el id');
+    }
+  };
   
 
   export const editarPlato = async (id: number, nuevoPlato: Plato): Promise<void> => {

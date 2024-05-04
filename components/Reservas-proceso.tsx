@@ -1,11 +1,15 @@
-import React, {  useState } from 'react';
+import React, {  useEffect, useLayoutEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, TextInput, Modal } from 'react-native';
 import Colors from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { Calendar } from 'react-native-calendars';
-import { useMutation } from '@tanstack/react-query';
-import {  ReservaInsert, Restaurante, crearReserva } from '@/app/api/api';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import {  ReservaInsert, Restaurante, crearReserva, getUsuarioByEmail } from '@/app/api/api';
 import { Link } from 'expo-router';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+
+
+
 
 interface Horario {
   id: number;
@@ -19,7 +23,28 @@ interface Props{
   restaurant:Restaurante
 }
 const Process=({ restaurant }: Props) =>{
+  const auth = getAuth(); // Obtener el objeto de autenticación
 
+  // Estado para almacenar el usuario autenticado
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return unsubscribe;
+  }, []);
+  const { data: usuario } = useQuery({
+    queryKey: ['usuarioEncontrado', currentUser?.email || ''], // Utiliza una cadena vacía como valor predeterminado si currentUser?.email es null
+    queryFn: () => {
+      if (currentUser?.email) {
+        return getUsuarioByEmail(currentUser.email);
+      } else {
+        // Si 'currentUser?.email' es null, devuelve un valor predeterminado o null
+        return null; 
+      }
+    }
+  });
   const today = new Date();
   today.setHours(0, 0, 0, 0); // Establece la hora a las 00:00:00
   const initialSelectedDate = today.toISOString().split('T')[0];
@@ -47,7 +72,6 @@ const Process=({ restaurant }: Props) =>{
           if (i === horaActual && j < minutosActuales) {
             continue; // Saltar los minutos pasados para la hora actual
           }
-  
           const horas = i > 12 ? i - 12 : i;
           const am_pm = i >= 12 ? 'pm' : 'am';
           const minutos = j === 0 ? '00' : j.toString();
@@ -95,18 +119,22 @@ const Process=({ restaurant }: Props) =>{
     setSelectedDate(day.dateString);
     setShowCalendar(false);
   }
-  
+
  const bookingConfirmed=()=>{
     if(selectedTime===''||numberOfPeople===null){
       Alert.alert('Error', '¡Debe seleccionar una cantidad de personas y un horario!');
       return;
     }
-    if (horarios.findIndex(horario => horario.hora === selectedTime) < 4) {
+    if (!usuario) {
+      console.error('El usuario no está definido.');
+      return;
+    }
+    if (horarios.findIndex(horario => horario.hora === selectedTime) < 4 && selectedDate===initialSelectedDate) {
       setDisponibilidadModal(true);
     } else {
       const nuevaReserva = {
         id_restaurante: restaurant.id,
-        id_usuario: 1,
+        id_usuario: usuario.id,
         fecha: selectedDate,
         hora: selectedTime,
         num_personas: numberOfPeople,
@@ -122,9 +150,13 @@ const Process=({ restaurant }: Props) =>{
       Alert.alert('Error', '¡Debe seleccionar una cantidad de personas y un horario!');
       return;
     }
+    if (!usuario) {
+      console.error('El usuario no está definido.');
+      return;
+    }
     const nuevaReserva = {
       id_restaurante: restaurant.id,
-      id_usuario: 1,
+      id_usuario: usuario?.id,
       fecha: selectedDate,
       hora: selectedTime,
       num_personas: numberOfPeople,

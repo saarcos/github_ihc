@@ -1,8 +1,6 @@
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { FlatList } from 'react-native-gesture-handler';
 import Colors from '@/constants/Colors';
-import platosData from '@/assets/data/platos.json';
 import RegEditPlato from '@/components/RegEditPlato';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
 import { useLocalSearchParams, useNavigation } from 'expo-router';

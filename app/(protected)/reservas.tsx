@@ -5,12 +5,32 @@ import Colors from '@/constants/Colors'
 import AppointmentCardItem from '@/components/AppointmentCardItem';
 import { defaultStyles } from '@/constants/Styles';
 import { useQuery } from '@tanstack/react-query';
-import { getReservas } from '../api/api';
+import { getReservas, getUsuarioByEmail } from '../api/api';
 import Animated from 'react-native-reanimated';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
+
 
 const Page = () => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const auth = getAuth(); // Obtener el objeto de autenticación
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
+    return unsubscribe;
+  }, []);
+  const { data: usuario } = useQuery({
+    queryKey: ['usuarioEncontrado', currentUser?.email || ''], // Utiliza una cadena vacía como valor predeterminado si currentUser?.email es null
+    queryFn: () => {
+      if (currentUser?.email) {
+        return getUsuarioByEmail(currentUser.email);
+      } else {
+        return null; 
+      }
+    }
+  });
   const [refreshing, setRefreshing] = useState(false);
   const{data:appointments, refetch}=useQuery({queryKey:['reservas'], queryFn:getReservas}) ;
   const navigation=useNavigation();
@@ -28,34 +48,32 @@ const Page = () => {
     });
     return unsubscribe;
   }, [navigation]);
-  // Ordenar las reservas por fecha de más nuevas a más antiguas
-  const sortedAppointments = appointments
-  ? appointments.sort((a, b) => {
-      const dateComparison = new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
-        if (dateComparison === 0) {
-        // Extraer las horas de las citas
-        const horaA = parseInt(a.hora.split(':')[0]);
-        const horaB = parseInt(b.hora.split(':')[0]);
+ // Obtener las reservas del usuario actual
+const userAppointments = appointments
+? appointments.filter(item => item.id_usuario === usuario?.id)
+: [];
 
-        // Comparar por hora
-        return horaB - horaA;
-      }
-      return dateComparison;
-    })
-  : [];
+// Ordenar las reservas del usuario por fecha de más nuevas a más antiguas
+const sortedAppointments = userAppointments.sort((a, b) => {
+const dateComparison = new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
+if (dateComparison === 0) {
+  // Extraer las horas de las citas
+  const horaA = parseInt(a.hora.split(':')[0]);
+  const horaB = parseInt(b.hora.split(':')[0]);
+  // Comparar por hora
+  return horaB - horaA;
+}
+return dateComparison;
+});
 
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0'); // El mes se indexa desde 0
-  const day = String(today.getDate()).padStart(2, '0');
-  
-  const todayFormatted = `${year}-${month}-${day}`;
-  const appointmentsToday = sortedAppointments.filter(item => {
-    return item.fecha >= todayFormatted;
-  });
-  // useEffect(() => {
-  //   console.log("Fecha: ",todayFormatted)
-  // }, [])
+// Filtrar las reservas del usuario para el día de hoy
+const today = new Date();
+const year = today.getFullYear();
+const month = String(today.getMonth() + 1).padStart(2, '0'); // El mes se indexa desde 0
+const day = String(today.getDate()).padStart(2, '0');
+const todayFormatted = `${year}-${month}-${day}`;
+
+const appointmentsToday = sortedAppointments.filter(item => item.fecha >= todayFormatted);
 
   return (
     <Animated.ScrollView style={[defaultStyles.container,{padding:10}]}

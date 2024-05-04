@@ -109,7 +109,6 @@ const Page = () => {
 	};
 
 	return (
-		<ScrollView>
 			<KeyboardAvoidingView
 			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
 			style={styles.container}
@@ -166,7 +165,6 @@ const Page = () => {
 				</TouchableOpacity>
 			</View>
 		</KeyboardAvoidingView>
-		</ScrollView>
 		
 	);
 };

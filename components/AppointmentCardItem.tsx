@@ -30,33 +30,20 @@ const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
   const confirmarEliminacion = () => {
     deleteMutation.mutate({ idReserva: appointment.id });
   };
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, '0'); // El mes se indexa desde 0
-  const day = String(today.getDate()).padStart(2, '0');
+  const today = moment(); // Obtener la fecha y hora actual usando moment.js
+  const appointmentTime = moment(appointment.hora, ['h:mm A']);
   
-  const fechaActual = `${year}-${month}-${day}`;  const horaActual = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  // Combinar la fecha y la hora para obtener la fecha completa de la cita
+  const fullAppointmentDateTime = moment(appointment.fecha + ' ' + appointment.hora, 'YYYY-MM-DD h:mm A');
   
+  // Comprobar si la cita está en el futuro o si es hoy pero aún no ha ocurrido
+  const isFutureAppointment = fullAppointmentDateTime.isAfter(today) || fullAppointmentDateTime.isSame(today, 'day') && appointmentTime.isAfter(today);
   
-  // Convertir la hora de la reserva a un formato comparable
-  const horaReserva = moment(appointment.hora, ['h:mm A']).format('HH:mm');
-  
-  // Comparar la fecha y la hora actual con la fecha y la hora de la reserva
-  let reservaEsFutura = false;
-  
-  if (appointment.fecha > fechaActual) {
-    reservaEsFutura = true; 
-  } else if (appointment.fecha === fechaActual) {
-    // Si la fecha de la reserva es igual a la fecha actual, entonces comparamos las horas
-    if (horaReserva > horaActual) {
-      reservaEsFutura = true; // Si la hora de la reserva es posterior a la hora actual, entonces la reserva es futura
-    }
-  }
-  // console.log("Fecha Actual: ",fechaActual+" Fecha del appointment: ",appointment.fecha)
+  // console.log("Fecha cita: ",appointmentDate, "Hora Cita: "+appointmentTime, "Fecha actual: ",today, "Resultado: ",isFutureAppointment)
 
 
   return (
-  <View style={[styles.card, reservaEsFutura ? null : styles.reservaPasada]}>
+  <View style={[styles.card, isFutureAppointment ? null : styles.reservaPasada]}>
       <View style={{justifyContent:'space-between', flexDirection:'row', alignItems:'center'}}>
         <Text style={{fontSize:18, fontFamily:'appfont-semi', marginTop:10}}>Fecha: {appointment.fecha}</Text>
         <Text style={{fontFamily:'appfont-light', color:Colors.wine, fontSize:15}}>{appointment.hora}</Text>
@@ -90,7 +77,7 @@ const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
                 <Ionicons name='people' size={20} color={Colors.red}/>
                 <Text style={{width:'78%',fontFamily:'appfont-light'}}>{appointment.num_personas}</Text>
             </View>
-            {reservaEsFutura &&(<View style={{alignSelf: 'flex-start',marginTop: 10}}>
+            {isFutureAppointment &&(<View style={{alignSelf: 'flex-start',marginTop: 10}}>
               <TouchableOpacity style={styles.btnCancelarAppointment} onPress={handleEliminarReserva}><Text style={styles.btnText}>Cancelar Reserva</Text></TouchableOpacity>
             </View>)}
         </View>
