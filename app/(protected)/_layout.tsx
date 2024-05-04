@@ -89,6 +89,17 @@ const DrawerLayout = () => {
 				}
 					redirect={authState?.role !== Role.ADMIN}
 				/>
+				<Tabs.Screen
+					name="reservasRestaurantes"
+					options={{
+						tabBarActiveTintColor:"red",
+						tabBarActiveBackgroundColor: "white",
+						tabBarLabel:'Reservas',
+						tabBarIcon:({color,size})=><Ionicons name='calendar-outline' color={color} size={size}/>
+					}
+				}
+					redirect={authState?.role !== Role.ADMIN}
+				/>
 	
 			</Tabs>
 

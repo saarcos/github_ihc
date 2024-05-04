@@ -252,8 +252,8 @@ const Process=({ restaurant }: Props) =>{
       >
         <View style={[styles.centeredView,{backgroundColor: 'rgba(0, 0, 0, 0.5)'}] } >
           <View style={styles.modalView}>
-            <Text style={styles.modalText}>¿Está seguro de que desea confirmar disponibilidad? </Text>
-            <Text style={{fontFamily:'appfont-light', color:Colors.grey, fontSize:14}}>Esta acción no confirmará una reserva </Text>
+            <Text style={styles.modalText}>Consultar disponibilidad </Text>
+            <Text style={{fontFamily:'appfont-light', color:Colors.grey, fontSize:14, textAlign:'center'}}>Esta acción no confirmará una reserva, el restaurante será notificado primero.</Text>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 20, gap:10 }}>
             <TouchableOpacity  onPress={() => setDisponibilidadModal(false)} style={[styles.btnVolver]}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
