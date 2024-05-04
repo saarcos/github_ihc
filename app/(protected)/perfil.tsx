@@ -1,19 +1,19 @@
-import React, { useLayoutEffect,useState } from 'react';
-import { Image } from 'react-native';
-import { View, SafeAreaView, StyleSheet, Text, Alert, TouchableOpacity} from 'react-native';
+import React, { useLayoutEffect, useState, useEffect } from 'react';
+import { Image, ActivityIndicator } from 'react-native';
+import { View, SafeAreaView, StyleSheet, Text, Alert, TouchableOpacity } from 'react-native';
 import { TouchableRipple } from 'react-native-paper';
 import { FontAwesome } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Svg, Path, Defs, LinearGradient, Stop} from 'react-native-svg';
+import { Svg, Path, Defs, LinearGradient, Stop } from 'react-native-svg';
 import Colors from '@/constants/Colors'
 import { useNavigation } from 'expo-router';
-import { Link, useRouter } from 'expo-router';
+import { Link, useRouter} from 'expo-router';
 import { getAuth, onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../../firebase-config';
+import { obtenerIdUsuarioPorCorreo, eliminarUsuario, obtenerUsuarioPorId } from '@/app/api/api';
 
-
-const perfil: React.FC = () => {
+const Perfil: React.FC = () => {
   function SvgTop() {
     return (
       <Svg
@@ -47,15 +47,14 @@ const perfil: React.FC = () => {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
 
-  const LogIn = () => {
-    router.push({ pathname: '/(modals)/login'});
-  }
+  const navigation = useNavigation();
 
-  const handleRegisterPress = () => {
-    router.back();
-  };
-
+  const [nombre, setNombre] = useState<string>('');
+  const [apellido, setApellido] = useState<string>('');
+  const [telefono, setTelefono] = useState<string>('');
+  const [correo, setCorreo] = useState<string>('');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useLayoutEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -68,13 +67,60 @@ const perfil: React.FC = () => {
     return unsubscribe;
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+        obtenerUsuario().then(() => setLoading(false));
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  useEffect(() => {
+    obtenerUsuario().then(() => setLoading(false));
+  }, []);
+
+  const handleRegisterPress = () => {
+    router.back();
+  };
+
 
   const handleSignOut = () => {
     signOut(auth)
-    router.push({ pathname: '/(modals)/login'});
+    router.push({ pathname: '/' });
   };
 
-  const handleDeleteAccount = () => {
+  const obtenerCorreoUsuario = () => {
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      const correo = currentUser.email;
+      return correo;
+    } else {
+      return null;
+    }
+  };
+
+  const obtenerUsuario = async () => {
+    try {
+      const correo = obtenerCorreoUsuario();
+      if (correo !== null) {
+        const idUsuario = await obtenerIdUsuarioPorCorreo(correo);
+        const usuarioObtenido = await obtenerUsuarioPorId(idUsuario);
+        if (usuarioObtenido) {
+          const { apellido, correo, id, nombre, password_usuario, telefono } = usuarioObtenido;
+          setNombre(nombre || '');
+          setApellido(apellido || '');
+          setTelefono(telefono ? telefono.toString() : '');
+          setCorreo(correo || '');
+        }
+      } else {
+        Alert.alert('Error al obtener el usuario');
+      }
+    } catch (error) {
+      console.error('Error al obtener el usuario:', error);
+      Alert.alert('Error al obtener el usuario');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
     if (currentUser) {
       Alert.alert(
         'Eliminar cuenta',
@@ -85,11 +131,27 @@ const perfil: React.FC = () => {
             text: 'Eliminar',
             onPress: async () => {
               try {
-                await currentUser.delete();
-                Alert.alert('Cuenta eliminada correctamente');
+                const correo = await obtenerCorreoUsuario();
+                if (correo !== null) {
+                  const userId = await obtenerIdUsuarioPorCorreo(correo);
+                  await eliminarUsuario(userId);
+                  await currentUser.delete();
+                  Alert.alert('Cuenta eliminada correctamente');
+                  router.push({ pathname: '/' });
+                } else {
+                  Alert.alert('Error al eliminar la cuenta');
+                }
               } catch (error) {
-                Alert.alert('Error al eliminar la cuenta:');
+                Alert.alert(
+                  'Tienes reservas pendientes',
+                  'Si quieres eliminar tu cuenta primero debes cancelarlas',
+                  [
+                    { text: 'OK', onPress: () => console.log('OK Pressed') }
+                  ],
+                  { cancelable: false }
+                );
               }
+              
             },
           },
         ],
@@ -98,95 +160,87 @@ const perfil: React.FC = () => {
     }
   };
 
-  const navigation=useNavigation();
-    useLayoutEffect(()=>{
-      navigation.setOptions({
-        headerTitle: () => ( 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: () => (
         <Image
           source={require('../(modals)/Imagen/logoBlanco.png')}
           style={{ width: 47, height: 45 }}
         />
       ),
-        headerTitleStyle: styles.headerTitle,
-        headerShadowVisible: false,
-        headerStyle: {
-          backgroundColor: '#803530', 
-        },
-      })
+      headerTitleStyle: styles.headerTitle,
+      headerShadowVisible: false,
+      headerStyle: {
+        backgroundColor: '#803530',
+      },
     })
+  })
 
-    return (
-      <SafeAreaView style={styles.container}>
-        {/* Renderizar solo si hay un usuario autenticado */}
-        {currentUser ? (
-          <>
-        <SvgTop />
-            <View style={styles.info}>
-              <View style={{ flexDirection: 'row', marginTop: 15 }}>
-                <View style={{ marginLeft: 20 }}>
-                  <Text style={[styles.titulo, { marginTop: 15, marginBottom: 5 }]}>Usuario</Text>
-                </View>
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Renderizar solo si hay un usuario autenticado */}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#E5332A" />
+        </View>
+      ) : currentUser ? (
+        <>
+          <SvgTop />
+          <View style={styles.info}>
+            <View style={{ flexDirection: 'row', marginTop: 15 }}>
+              <View style={{ marginLeft: 20 }}>
+                <Text style={[styles.titulo, { marginTop: 15, marginBottom: 5 }]}>{nombre} {apellido}</Text>
               </View>
-            </View>
-
-            <View style={styles.info}>
-              <View style={styles.fila}>
-                <FontAwesome name="phone" size={20} color="#777777" style={{ marginRight: 10 }} />
-                <Text style={{ color: "#777777", marginLeft: 20 }}>+593 987654321</Text>
-              </View>
-              <View style={styles.fila}>
-                <MaterialIcons name="email" size={20} color="#777777" style={{ marginRight: 10 }} />
-                {currentUser && <Text style={{ color: "#777777", marginLeft: 20 }}>{currentUser.email}</Text>}
-              </View>
-            </View>
-  
-            <View style={styles.separacion}></View>
-  
-            <View style={styles.menu}>
-              <TouchableRipple onPress={() => { }}>
-                <View style={styles.menuItem}>
-                  <FontAwesome name="heart" size={20} color="#BC3A31" style={{ marginRight: 10 }} />
-                  <Text style={styles.textoIcono}>Tus Favoritos</Text>
-                </View>
-              </TouchableRipple>
-              <Link href="/(modals)/editarPerfil" asChild>
-                <TouchableRipple onPress={handleRegisterPress}>
-                  <View style={styles.menuItem}>
-                    <MaterialIcons name="edit" size={20} color="#BC3A31" style={{ marginRight: 10 }} />
-                    <Text style={styles.textoIcono}>Editar perfil</Text>
-                  </View>
-                </TouchableRipple>
-              </Link>
-              <TouchableRipple onPress={handleSignOut}>
-                <View style={styles.menuItem}>
-                  <MaterialIcons name="exit-to-app" size={20} color="#BC3A31" style={{ marginRight: 10 }} />
-                  <Text style={styles.textoIcono}>Cerrar Sesión</Text>
-                </View>
-              </TouchableRipple>
-              <TouchableRipple onPress={handleDeleteAccount}>
-                <View style={styles.menuItem}>
-                  <FontAwesome name="trash" size={20} color="#BC3A31" style={{ marginRight: 10 }} />
-                  <Text style={styles.textoIcono}>Eliminar cuenta</Text>
-                </View>
-              </TouchableRipple>
-            </View>
-          </>
-        ): (
-          <View style={styles.messageContainer}>
-            <Text style={styles.message}>Inicia sesión para ver el contenido</Text>
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity onPress={LogIn}>
-                <Text style={styles.buttonText}>Iniciar Sesión</Text>
-              </TouchableOpacity>
             </View>
           </View>
-        )}
+          <View style={styles.info}>
+            <View style={styles.fila}>
+              <FontAwesome name="phone" size={20} color="#777777" style={{ marginRight: 10 }} />
+              <Text style={{ color: "#777777", marginLeft: 20 }}>0{telefono}</Text>
+            </View>
+            <View style={styles.fila}>
+              <MaterialIcons name="email" size={20} color="#777777" style={{ marginRight: 10 }} />
+              {currentUser && <Text style={{ color: "#777777", marginLeft: 20 }}>{correo}</Text>}
+            </View>
+          </View>
 
-      </SafeAreaView>
-    );
-  };
+          <View style={styles.separacion}></View>
 
-export default perfil;
+          <View style={styles.menu}>
+            <TouchableRipple onPress={() => { }}>
+              <View style={styles.menuItem}>
+                <FontAwesome name="heart" size={20} color="#BC3A31" style={{ marginRight: 10 }} />
+                <Text style={styles.textoIcono}>Tus Favoritos</Text>
+              </View>
+            </TouchableRipple>
+            <Link href="/(modals)/editarPerfil" asChild>
+              <TouchableRipple onPress={handleRegisterPress}>
+                <View style={styles.menuItem}>
+                  <MaterialIcons name="edit" size={20} color="#BC3A31" style={{ marginRight: 10 }} />
+                  <Text style={styles.textoIcono}>Editar perfil</Text>
+                </View>
+              </TouchableRipple>
+            </Link>
+            <TouchableRipple onPress={handleSignOut}>
+              <View style={styles.menuItem}>
+                <MaterialIcons name="exit-to-app" size={20} color="#BC3A31" style={{ marginRight: 10 }} />
+                <Text style={styles.textoIcono}>Cerrar Sesión</Text>
+              </View>
+            </TouchableRipple>
+            <TouchableRipple onPress={handleDeleteAccount}>
+              <View style={styles.menuItem}>
+                <FontAwesome name="trash" size={20} color="#BC3A31" style={{ marginRight: 10 }} />
+                <Text style={styles.textoIcono}>Eliminar cuenta</Text>
+              </View>
+            </TouchableRipple>
+          </View>
+        </>
+      ) : null}
+    </SafeAreaView>
+  );
+};
+
+export default Perfil;
 
 const styles = StyleSheet.create({
   container: {
@@ -229,16 +283,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 26,
   },
-  headerStyle:{
-    fontFamily:'appfont-bold',
-    color:Colors.dark,
-    textTransform:'capitalize',
-    backgroundColor:'#803530',
-    fontSize:20
+  headerStyle: {
+    fontFamily: 'appfont-bold',
+    color: Colors.dark,
+    textTransform: 'capitalize',
+    backgroundColor: '#803530',
+    fontSize: 20
   },
-  headerTitle:{
-    fontFamily:'appfont-bold',
-    fontSize:22
+  headerTitle: {
+    fontFamily: 'appfont-bold',
+    fontSize: 22
   },
   messageContainer: {
     flex: 1,
@@ -259,5 +313,10 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#FFF',
     fontSize: 16,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

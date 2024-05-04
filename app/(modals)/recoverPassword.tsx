@@ -4,16 +4,25 @@ import { View, StyleSheet, Text, TextInput, TouchableOpacity, Alert } from 'reac
 import { app } from '../../firebase-config';
 import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 import { useNavigation, useRouter } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const Page = () => {
   const [email, setEmail] = useState('');
   const router = useRouter();
   const navigation=useNavigation();
-  useLayoutEffect(()=>{
+
+  useLayoutEffect(() => {
     navigation.setOptions({
-      headerShown:false,
-    })
-  })
+      headerShown: true,
+      title: '',
+      headerLeft: () => (
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <MaterialIcons name="arrow-back" size={24} color={Colors.primary} />
+        </TouchableOpacity>
+      ),
+    });
+  }, [navigation]);
+
   const handleChangePassword = () => {
     const auth = getAuth(app);
     sendPasswordResetEmail(auth, email)
@@ -78,6 +87,9 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  backButton: {
+    marginLeft: 10,
   },
 });
 

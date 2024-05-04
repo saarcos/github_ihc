@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Svg, Path, Defs, LinearGradient, Stop, Image } from 'react-native-svg';
-import { Text, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View, Alert, ScrollView } from 'react-native';
+import { Text, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View, Alert, BackHandler } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { Link, router, useRouter } from 'expo-router';
 import Colors from '@/constants/Colors';
@@ -20,6 +20,14 @@ const auth = initializeAuth(app, {
 
 const Page = () => {
 	const router = useRouter();
+
+	useEffect(() => {
+		const backAction = () => {
+			return true;
+		};
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+		return () => backHandler.remove();
+	}, []);
 
 	const handleRecoverPass = () => {
 		router.push({ pathname: './(modals)/recoverPassword' });
@@ -85,8 +93,8 @@ const Page = () => {
 		try {
 			const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 			// Validar el formato del correo electrónico y la longitud de la contraseña
-			if (!emailValid.test(email) || password.length < 6) {
-				Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 6 caracteres');
+			if (!emailValid.test(email) || password.length < 7) {
+				Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 7 caracteres');
 				return;
 			}
 			const { esRestaurante, esUsuario } = await verificarCorreo(email);

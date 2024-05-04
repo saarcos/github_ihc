@@ -84,6 +84,16 @@ export  interface PlatoInsert {
     password_usuario: string;
   }
 
+  export interface UsuarioModify {
+    nombre?: string;
+    apellido?: string;
+    telefono?: number;
+  }
+
+  export interface UsuarioPass {
+    password_usuario?: string;
+  }
+
   interface ServerResponse {
     success: boolean;
     message?: string;
@@ -240,6 +250,81 @@ export  interface PlatoInsert {
       }
     } catch (error) {
       throw new Error('Error al CREAR el usuario.');
+    }
+  };
+
+  export const editarUsuario = async ( id: number, nuevoUsuario: UsuarioModify): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/usuario/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevoUsuario),
+      });
+      if (!response.ok) {
+        throw new Error('Error al editar el usuario.');
+      }
+    } catch (error) {
+      throw new Error('Error al editar el usuario.');
+    }
+  };
+
+  export const actualizarContraseñaUsuario = async (id: number, nuevaPassword: UsuarioPass): Promise<void> => {
+      try {
+        const response = await fetch(`${API_URL}/usuarios/${id}`, {
+          method: 'PUT',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(nuevaPassword),
+        });
+        if (!response.ok) {
+          throw new Error('Error al actualizar la contraseña del usuario.');
+        }
+      } catch (error) {
+          throw new Error('Error al actualizar la contraseña del usuario.');
+      }
+  };
+
+  export const eliminarUsuario = async (id: number): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/usuarios/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error al eliminar el usuario.');
+      }
+    } catch (error) {
+      throw new Error('Error al eliminar el usuario.');
+    }
+  };
+
+  export const obtenerIdUsuarioPorCorreo = async (correo: string) => {
+    try {
+        const response = await fetch(`${API_URL}/usuario/${correo}`);
+        const data = await response.json();
+
+        if (response.ok) {
+            return data.id;
+        } else {
+            throw new Error('Error al obtener el ID del usuario 1.');
+        }
+    } catch (error) {
+        throw new Error('Error al obtener el ID del usuario 2.');
+    }
+  };
+
+  export const obtenerUsuarioPorId = async (id: number): Promise<Usuario> => {
+    try {
+      const response = await fetch(`${API_URL}/usuarios/${id}`);
+      if (!response.ok) {
+        throw new Error('Error al obtener el usuario.');
+      }
+      const usuario = await response.json();
+      return Array.isArray(usuario) ? usuario[0] : usuario;
+    } catch (error) {
+      throw new Error('Error al obtener el usuario.');
     }
   };
 
