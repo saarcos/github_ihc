@@ -144,7 +144,7 @@ export  interface PlatoInsert {
   };
   export const getUsuarioByEmail = async (email: string): Promise<Usuario> => {
     try {
-      const response = await fetch(`${API_URL}/usuarios/${email}`);
+      const response = await fetch(`${API_URL}/usuarioCorreo/${email}`);
       if (!response.ok) {
         throw new Error('Error al obtener los platos.');
       }
@@ -247,7 +247,23 @@ export  interface PlatoInsert {
       throw new Error('Error al eliminar la reserva.');
     }
   };
-  
+  export const updateReserva = async (id: number, nuevaReserva: ReservaInsert): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/reservas/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevaReserva),
+      });
+      if (!response.ok) {
+        throw new Error('Error al editar la reserva.');
+      }
+    } catch (error) {
+      throw new Error('Error al editar la reserva.');
+    }
+  };
+  //usuarios
   export const insertarUsuario = async ( nuevoUsuario: UsuarioInsert): Promise<void> => {
     try {
       const response = await fetch(`${API_URL}/usuario/`, {
