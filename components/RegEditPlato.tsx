@@ -157,9 +157,7 @@ const RegEditPlato = ({ plato , idRestaurante }: Props) => {
       <View style={{ flexDirection: 'row' }}>
         <TouchableOpacity style={styles.button} onPress={handleEditarPlato}>
           <Text style={styles.buttonText}><FontAwesome name="save" size={24} color="white" /></Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.cancelButton]}>
-          <Text style={styles.buttonText}><MaterialIcons name="cancel" size={24} color="white" /></Text>
+          <Text style={{color:'white'}}>Guardar</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -195,6 +193,8 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     margin: 5,
     borderRadius: 5,
+    alignItems:'center',
+    alignContent:'center'
   },
   cancelButton: {
     backgroundColor: 'red',

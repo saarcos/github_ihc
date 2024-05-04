@@ -12,18 +12,31 @@ import { Button } from 'react-native-paper';
 import { useQuery } from '@tanstack/react-query';
 import {getPlatoRestauranteByID } from '../api/api';
 import MenuAdminRestaurante from '@/components/MenuAdminRestaurante';
-
-
+import { getAuth } from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+import { firebaseConfig } from '../../firebase-config';
+import { getUsuarioAdminByEmail } from '../api/api';
 const perfil: React.FC = () => {
 
 
   const router = useRouter();
-
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const user = auth.currentUser;
     const handleRegisterPress = () => {
       router.back();
     };
-    // const {id}=useLocalSearchParams<{id:string}>();
-    const idComoNumero = 6; 
+    const { data: usuario } = useQuery({
+      queryKey: ['usuarioEncontrado', user?.email || ''], 
+      queryFn: () => {
+        if (user?.email) {
+          return getUsuarioAdminByEmail(user.email);
+        } else {
+          return null; 
+        }
+      }
+    });
+    const idComoNumero = typeof usuario?.id === 'number' ? usuario.id : parseInt(usuario?.id || "0");
     const { data: plato } = useQuery({queryKey:['plato',idComoNumero],queryFn:()=> getPlatoRestauranteByID(idComoNumero)});
   
   
@@ -50,7 +63,7 @@ const perfil: React.FC = () => {
         <View style={{ flexDirection: 'row', marginTop: 15 }}>
           <View >
               {plato ? (
-                <MenuAdminRestaurante plato={plato} />
+                <MenuAdminRestaurante plato={plato} id={idComoNumero}  />
               ) : (
                 <Text>No se encontró ningún restaurante con el ID proporcionado.</Text>
               )}

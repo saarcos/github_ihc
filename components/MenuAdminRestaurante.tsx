@@ -19,22 +19,20 @@ import Animated, {
 
 
 interface Props {
-  plato: Plato;
+  plato: Plato,
+  id:number
 }
 
 
-const MenuAdminRestaurante = ({ plato }: Props) => {
+const MenuAdminRestaurante = ({ id }: Props) => {
 
-  useEffect(() => {
-  }, [plato]); 
 
-    
+  
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
-    const idComoNumero = plato.id_restaurante; 
-      const { data: platos } = useQuery({queryKey:['plato',idComoNumero],queryFn:()=> getPlatoRestauranteByID(idComoNumero)});
-      console.log(platos)
 
-    const platoArray = Array.isArray(plato) ? plato : [plato];
+      const { data: platos } = useQuery({queryKey:['plato',id],queryFn:()=> getPlatoRestauranteByID(id)});
+ 
+      const platoArray = Array.isArray(platos) ? platos : [platos];
 
 
     

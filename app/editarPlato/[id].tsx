@@ -33,10 +33,14 @@ const Page = () =>{
     queryFn: () => getPlatoByID(idComoNumero)
   });
   
-  if (isLoading || !plato) {
+  if (isLoading) {
     // Aquí puedes mostrar un mensaje de carga o cualquier otra cosa mientras se obtienen los datos
     return <LoadingSpinner />;
   }
+  // if (isLoading || !plato) {
+  //   // Aquí puedes mostrar un mensaje de carga o cualquier otra cosa mientras se obtienen los datos
+  //   return <LoadingSpinner />;
+  // }
 
 
 

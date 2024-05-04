@@ -38,7 +38,7 @@ const Page = () =>{
   return (
     <View >
       {plato ? (
-        <MenuAdminRestaurante plato={plato} />
+        <MenuAdminRestaurante plato={plato} id={idComoNumero} />
       ) : (
         <Text>No se encontró ningún restaurante con el ID proporcionado.</Text>
       )}
