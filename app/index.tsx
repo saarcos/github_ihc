@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Svg, Path, Defs, LinearGradient, Stop, Image } from 'react-native-svg';
-import {Text, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View, Alert,ScrollView} from 'react-native';
+import { Text, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View, Alert, ScrollView } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { Link, router, useRouter } from 'expo-router';
 import Colors from '@/constants/Colors';
@@ -15,24 +15,30 @@ import { verificarCorreo } from '@/app/api/api';
 const app = initializeApp(firebaseConfig);
 
 const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
+	persistence: getReactNativePersistence(AsyncStorage)
 });
 
 const Page = () => {
 	const router = useRouter();
 
 	const handleRecoverPass = () => {
-		router.push({ pathname: './(modals)/recoverPassword'});
+		router.push({ pathname: './(modals)/recoverPassword' });
 	};
 	const handleRegisterUser = () => {
-		router.push({ pathname: '/(modals)/Registro'});
+		router.push({ pathname: '/(modals)/Registro' });
 	};
 	const handleRegisterAdmin = async () => {
-		router.push({ pathname: '/(modals)/RegistroRestaurantes'});
+		router.push({ pathname: '/(modals)/RegistroRestaurantes' });
 	};
+	const [showPassword, setMostrarContraseña] = useState<boolean>(false);
+	const toggleMostrarContraseña = () => {
+		setMostrarContraseña(!showPassword);
+	};
+
+
 	function SvgTop() {
 		return (
-			
+
 			<Svg
 				width={500}
 				height={300}
@@ -64,7 +70,7 @@ const Page = () => {
 					height="195"
 					href={require('./(modals)/Imagen/logoBlanco.png')}
 				/>
-				
+
 
 			</Svg>
 		);
@@ -77,74 +83,95 @@ const Page = () => {
 
 	const SignIn = async () => {
 		try {
-		  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		  // Validar el formato del correo electrónico y la longitud de la contraseña
-		  if (!emailValid.test(email) || password.length < 6) {
-			Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 6 caracteres');
-			return;
-		  }
-		  const { esRestaurante, esUsuario } = await verificarCorreo(email);
-		  signInWithEmailAndPassword(auth, email, password)
-			.then((userCredential) => {
-			  const user = userCredential.user;
-			  setCurrentUser(user);
-			  router.push({ pathname: '/(protected)/perfil'});
-			  if (esRestaurante) {
-				onLogin!('admin', 'admin');
-			  } else if (esUsuario) {
-				onLogin!('user', 'user');
-			  } else {
-				console.log('El correo no está registrado');
-			  }
-			  setEmail('');
-			  setPassword('');
-			})
-			.catch(error => {
-			  let errorMessage = 'Correo electrónico o contraseña incorrectos';
-			  Alert.alert(errorMessage);
-			});
+			const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			// Validar el formato del correo electrónico y la longitud de la contraseña
+			if (!emailValid.test(email) || password.length < 6) {
+				Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 6 caracteres');
+				return;
+			}
+			const { esRestaurante, esUsuario } = await verificarCorreo(email);
+			signInWithEmailAndPassword(auth, email, password)
+				.then((userCredential) => {
+					const user = userCredential.user;
+					setCurrentUser(user);
+					router.push({ pathname: '/(protected)/perfil' });
+					if (esRestaurante) {
+						onLogin!('admin', 'admin');
+					} else if (esUsuario) {
+						onLogin!('user', 'user');
+					} else {
+						console.log('El correo no está registrado');
+					}
+					setEmail('');
+					setPassword('');
+				})
+				.catch(error => {
+					let errorMessage = 'Correo electrónico o contraseña incorrectos';
+					Alert.alert(errorMessage);
+				});
 		} catch (error) {
-		  Alert.alert('Error', 'Ocurrió un error al verificar el correo. Por favor, inténtalo de nuevo más tarde.');
+			Alert.alert('Error', 'Ocurrió un error al verificar el correo. Por favor, inténtalo de nuevo más tarde.');
 		}
 	};
 
 	return (
 			<KeyboardAvoidingView
-			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-			style={styles.container}
-		>
-			<View style={{ marginHorizontal: -30, marginTop: -30 }}>
-				
-				<SvgTop />
-				
-			</View>
-			<View style={{ justifyContent: 'center', alignItems: 'center', padding: 10, borderRadius: 10 }}>
-				<Text style={{ fontSize: 16, color: 'black' }}>Iniciar Sesión</Text>
-			</View>
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+				style={styles.container}
+			>
+				<View style={{ marginHorizontal: -30, marginTop: -30 }}>
 
-			<View>
-				<TextInput
-					onChangeText={(text) => setEmail(text)}
-					style={styles.input}
-					placeholder="usuario@email.com"
-				/>
-				<TextInput
-					onChangeText={(text) => setPassword(text)}
-					style={styles.input}
-					placeholder="contraseña"
-					secureTextEntry={true}
-				/>
-			</View>
+					<SvgTop />
 
-			<TouchableOpacity style={[defaultStyles.btn]} onPress={SignIn}>
-				<Text style={[defaultStyles.btnText]}>Ingresar</Text>
-			</TouchableOpacity>
+				</View>
+				<View style={{ justifyContent: 'center', alignItems: 'center', padding: 10, borderRadius: 10 }}>
+					<Text style={{ fontSize: 16, color: 'black' }}>Iniciar Sesión</Text>
+				</View>
 
-			<View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 5}}>
-				<TouchableOpacity onPress={handleRecoverPass}>
-					<Text style={styles.btnText}>¿Olvidaste tu contraseña?</Text>
+				<Text style={styles.label}>Correo:</Text>
+				<View style={styles.inputContainer}>
+					<View style={styles.inputWrapper}>
+						<Ionicons name="mail-outline" size={20} color="#777" style={styles.icon} />
+						<TextInput
+
+							onChangeText={(text) => setEmail(text)}
+							style={styles.input}
+							placeholder="usuario@email.com"
+						/>
+					</View>
+				</View>
+				<Text style={styles.label}>Contraseña:</Text>
+				<View style={styles.inputContainer}>
+					<View style={styles.inputWrapper}>
+						<Ionicons name="lock-closed" size={20} color="#777" style={styles.icon} />
+						<TextInput
+							onChangeText={(text) => setPassword(text)}
+							style={styles.input}
+							placeholder="contraseña"
+							secureTextEntry={!showPassword}
+						/>
+						<TouchableOpacity onPress={toggleMostrarContraseña}>
+							<Ionicons
+								name={showPassword ? 'eye-off' : 'eye'}
+								size={20}
+								color="#777"
+								style={styles.icon}
+							/>
+						</TouchableOpacity>
+
+					</View>
+				</View>
+
+
+				<TouchableOpacity style={[defaultStyles.btn]} onPress={SignIn}>
+					<Text style={[defaultStyles.btnText]}>Ingresar</Text>
 				</TouchableOpacity>
-			</View>
+
+				<View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 5 }}>
+					<TouchableOpacity onPress={handleRecoverPass}>
+						<Text style={styles.btnText}>¿Olvidaste tu contraseña?</Text>
+					</TouchableOpacity>
+				</View>
 
 			<View style={styles.separatorView}>
 				<View style={{
@@ -172,7 +199,7 @@ const Page = () => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: '#fff',
+		backgroundColor: '#f1f1f1',
 		padding: 26,
 	},
 	btn: {
@@ -189,6 +216,22 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 		marginTop: 10,
 	},
+	inputContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: 10,
+
+	},
+	inputWrapper: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		width: '90%',
+		borderColor: 'white',
+		borderWidth: 1,
+		borderRadius: 30,
+		backgroundColor: 'white',
+		marginLeft: 25,
+	},
 	separatorView: {
 		flexDirection: 'row',
 		alignItems: 'center',
@@ -196,6 +239,14 @@ const styles = StyleSheet.create({
 	},
 	separator: {
 		color: Colors.grey,
+	},
+	label: {
+		width: '100%',
+		fontSize: 16,
+		fontWeight: 'bold',
+		textAlign: 'left',
+		marginLeft: 15,
+
 	},
 	titulo: {
 		width: '75%',
@@ -224,16 +275,22 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		paddingHorizontal: 10,
 	},
+	icon: {
+		marginHorizontal: 10,
+		color: '#803530',
+		backgroundColor: 'white'
+	},
 	btnOutlineText: {
 		color: '#000',
 		fontSize: 16,
 	},
 	input: {
+		flex: 1,
 		height: 55,
-		marginTop: 20,
-		borderRadius: 30,
-		paddingHorizontal: 30,
-		backgroundColor: '#fff',
+		paddingHorizontal: 10,
+		backgroundColor: 'white',
+		borderRadius: 30
+
 	},
 })
 export default Page;
