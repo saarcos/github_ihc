@@ -30,6 +30,12 @@ const Page = () => {
 	const handleRegisterAdmin = async () => {
 		router.push({ pathname: '/(modals)/RegistroRestaurantes'});
 	};
+	const [showPassword, setMostrarContraseña] = useState<boolean>(false);
+	const toggleMostrarContraseña = () => {
+		setMostrarContraseña(!showPassword);
+	  };
+	
+  
 	function SvgTop() {
 		return (
 			
@@ -134,7 +140,16 @@ const Page = () => {
 					style={styles.input}
 					placeholder="contraseña"
 					secureTextEntry={true}
+					
 				/>
+				<TouchableOpacity onPress={toggleMostrarContraseña}>
+                <Ionicons
+                  name={showPassword ? 'eye-off' : 'eye'}
+                  size={20}
+                  color="#777"
+                  style={styles.icon}
+                />
+              </TouchableOpacity>
 			</View>
 
 			<TouchableOpacity style={[defaultStyles.btn]} onPress={SignIn}>
@@ -226,6 +241,11 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		paddingHorizontal: 10,
 	},
+	icon: {
+		marginHorizontal: 10,
+		color: '#803530',
+		backgroundColor: 'white'
+	  },
 	btnOutlineText: {
 		color: '#000',
 		fontSize: 16,
