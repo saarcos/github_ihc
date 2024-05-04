@@ -1,7 +1,7 @@
 import React, { useState, useLayoutEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Alert } from 'react-native';
 import { defaultStyles } from '@/constants/Styles';
-
+import RNPickerSelect from 'react-native-picker-select';
 import { Image, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as ImagePicker from 'expo-image-picker'; // Para Expo
@@ -32,6 +32,8 @@ const Registro = ({ restaurante }: Props) => {
   const [direccion, setDireccion] = useState(restaurante?.direccion || '');
   const [foto, setfoto] = useState(restaurante?.foto || '');
   const [aforo, setAforo] = useState(restaurante?.aforo ? restaurante.aforo.toString() : '');
+  const [ingresarHoraA, setIngresarHoraA] = useState<boolean>(true); // Estado para controlar si se debe mostrar el mensaje de ingresar la hora
+  const [ingresarHoraC, setIngresarHoraC] = useState<boolean>(true); // Estado para controlar si se debe mostrar el mensaje de ingresar la hora
   const [horaapertura, setHoraapertura] = useState(restaurante?.horaApertura ? new Date(restaurante.horaApertura) : new Date());
   const [horacierre, setHoracierre] = useState(restaurante?.horaCierre ? new Date(restaurante.horaCierre) : new Date());
   const [showPassword, setMostrarContraseña] = useState<boolean>(false);
@@ -98,8 +100,8 @@ const Registro = ({ restaurante }: Props) => {
   };
   const dateTimePickerStyle = Platform.OS === 'android' ? {
     backgroundColor: 'red', // Cambia el color de fondo para Android
-    
-    
+
+
   } : {
     // Define estilos adicionales para otras plataformas si es necesario
   };
@@ -210,6 +212,7 @@ const Registro = ({ restaurante }: Props) => {
     const currentDate = selectedDate || horaapertura;
     setShowAperturaPicker(false); // Ocultar el selector de hora de apertura
     setHoraapertura(currentDate); // Actualizar el estado de la hora de apertura
+    setIngresarHoraA(false); // Después de ingresar la hora, cambiar el estado para dejar de mostrar el mensaje
   };
 
   // Función para manejar el cambio de hora de cierre
@@ -217,15 +220,17 @@ const Registro = ({ restaurante }: Props) => {
     const currentDate = selectedDate || horacierre;
     setShowCierrePicker(false); // Ocultar el selector de hora de cierre
     setHoracierre(currentDate); // Actualizar el estado de la hora de cierre
+    setIngresarHoraC(false); // Después de ingresar la hora, cambiar el estado para dejar de mostrar el mensaje
   };
-  const mostrarSelectorHoraApertura = () => {
-    setShowAperturaPicker(true);
+  const handleIngresarHora = () => {
+    setIngresarHoraA(false); // Después de hacer clic, cambiar el estado para dejar de mostrar el mensaje
+    setShowAperturaPicker(true); // Mostrar el selector de hora de apertura
+  };
+  const handleCierreHora = () => {
+    setIngresarHoraC(false); // Después de hacer clic, cambiar el estado para dejar de mostrar el mensaje
+    setShowCierrePicker(true); // Mostrar el selector de hora de apertura
   };
 
-  // Función para mostrar el selector de hora de cierre
-  const mostrarSelectorHoraCierre = () => {
-    setShowCierrePicker(true);
-  };
 
   const toggleMostrarContraseña = () => {
     setMostrarContraseña(!showPassword);
@@ -294,13 +299,22 @@ const Registro = ({ restaurante }: Props) => {
             </View>}
           <Text style={styles.label}>Categoria del Restaurante:</Text>
           <View style={styles.inputContainer}>
+            {/* Utiliza RNPickerSelect en lugar de TextInput */}
             <View style={styles.inputWrapper}>
               <Ionicons name="apps" size={20} color="#777" style={styles.icon} />
-              <TextInput
-                style={styles.input}
-                placeholder="Categoria de Restaurante"
-                onChangeText={validarCategoriaRestaurante}
-                value={categoria}
+              <RNPickerSelect
+                style={pickerSelectStyles}
+                placeholder={{
+                  label: 'Seleccionar categoría',
+                  value: null,
+                }}
+                onValueChange={(value) => validarCategoriaRestaurante(value)}
+                items={[
+                  { label: 'Categoria 1', value: '1' },
+                  { label: 'Categoria 2', value: '2' },
+                  { label: 'Categoria 3', value: '3' },
+                  // Agrega más opciones según sea necesario
+                ]}
               />
             </View>
           </View>
@@ -405,42 +419,55 @@ const Registro = ({ restaurante }: Props) => {
           </View>
           {errors.aforo && <Text style={styles.errorText}>{errors.aforo}</Text>}
 
-          <Text style={styles.label}>Hora de Apertura:</Text>
-          <View style={styles.inputContainer}>
-            <TouchableOpacity style={styles.inputWrapper} onPress={mostrarSelectorHoraApertura}>
-              <Ionicons name="time" size={20} color="#777" style={styles.icon} />
-              <Text style={styles.input}>{format(horaapertura, 'HH:mm')}</Text>
-            </TouchableOpacity>
-            {showAperturaPicker && (
-              <DateTimePicker
-                testID="dateTimePicker"
-                value={horaapertura}
-                mode="time"
-                is24Hour={true}
-                display="default"
-                onChange={onChangeApertura}
-                style={dateTimePickerStyle} // Aplica el estilo condicionalmente
-              />
-            )}
+          <View style={styles.horasContainer}>
+            <View style={styles.horaContainer}>
+              <Text style={styles.label2}>Hora de Apertura:</Text>
+              <View style={styles.inputWrapper2}>
+                <TouchableOpacity style={styles.inputContainer} onPress={handleIngresarHora}>
+                  <Ionicons name="time" size={20} color="#777" style={styles.icon2} />
+                  <Text style={styles.horaInput}>
+                    {ingresarHoraA ? 'HH:MM Am' : format(horaapertura, 'HH:mm')}
+                  </Text>
+                </TouchableOpacity>
+                {showAperturaPicker && (
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={horaapertura}
+                    mode="time"
+                    is24Hour={true}
+                    display="default"
+                    onChange={onChangeApertura}
+                    style={dateTimePickerStyle} // Aplica el estilo condicionalmente
+                  />
+                )}
+              </View>
+            </View>
+            <View style={styles.horaContainer}>
+              <Text style={styles.label2}>Hora de Cierre:</Text>
+              <View style={styles.inputWrapper2}>
+                <TouchableOpacity style={styles.inputContainer} onPress={handleCierreHora}>
+                  <Ionicons name="time" size={20} color="#777" style={styles.icon2} />
+                  <Text style={styles.horaInput}>
+                    {ingresarHoraC ? 'HH:MM Pm' : format(horacierre, 'HH:mm')}
+                  </Text>
+                </TouchableOpacity>
+                {showCierrePicker && (
+                  <DateTimePicker
+                    testID="dateTimePicker"
+                    value={horacierre}
+                    mode="time"
+                    is24Hour={true}
+                    display="default"
+                    onChange={onChangeCierre}
+                    style={dateTimePickerStyle} // Aplica el estilo condicionalmente
+                  />
+                )}
+              </View>
+            </View>
           </View>
-          <Text style={styles.label}>Hora de Cierre:</Text>
-          <View style={styles.inputContainer}>
-            <TouchableOpacity style={styles.inputWrapper} onPress={mostrarSelectorHoraCierre}>
-              <Ionicons name="time" size={20} color="#777" style={styles.icon} />
-              <Text style={styles.input}>{format(horacierre, 'HH:mm')}</Text>
-            </TouchableOpacity>
-            {showCierrePicker && (
-              <DateTimePicker 
-                testID="dateTimePicker"
-                value={horacierre}
-                mode="time"
-                is24Hour={true}
-                display="default"
-                onChange={onChangeCierre}
-                style={dateTimePickerStyle} // Aplica el estilo condicionalmente
-              />
-            )}
-          </View>
+
+
+
 
           <TouchableOpacity style={[defaultStyles.btn, { alignItems: 'center', justifyContent: 'center', alignContent: 'center' }]} onPress={handleCrearRestaurante}>
             <Text style={{ color: 'white', fontSize: 16 }}>Registrarse</Text>
@@ -474,6 +501,43 @@ const styles = StyleSheet.create({
     marginBottom: 10,
 
   },
+  label2: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  inputWrapper2: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    borderColor: 'white',
+    borderWidth: 1,
+    borderRadius: 30,
+    backgroundColor: 'white',
+    height: 55,
+
+  },
+  horasContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+
+  },
+  horaContainer: {
+    flex: 1,
+    marginRight: 10,
+  },
+  horaInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    color: 'gray'
+  },
+  icon2: {
+    marginRight: 10, // Espacio entre el icono y el texto de la hora
+    marginTop: 5,
+    color: '#803530',
+
+  },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -500,6 +564,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center'
   },
+
   input: {
     flex: 1,
     height: 55,
@@ -509,6 +574,7 @@ const styles = StyleSheet.create({
 
 
   },
+
   label: {
     width: '100%',
     fontSize: 16,
@@ -529,7 +595,7 @@ const styles = StyleSheet.create({
     marginRight: 20,
     marginLeft: 30
   },
-  
+
   buttonText: {
     color: 'black',
     fontSize: 16,
@@ -548,7 +614,7 @@ const styles = StyleSheet.create({
 const pickerSelectStyles = StyleSheet.create({
   inputAndroid: {
     fontSize: 16,
-    paddingHorizontal: 100,
+    paddingHorizontal: 140,
     paddingVertical: 7,
     borderWidth: 1,
     borderColor: 'white',
@@ -557,7 +623,7 @@ const pickerSelectStyles = StyleSheet.create({
     marginBottom: 10,
     width: '90%',
     backgroundColor: 'white',
-    marginLeft: 25,
+    marginLeft: 0,
     height: 55
 
   },
