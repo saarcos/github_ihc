@@ -12,17 +12,16 @@ import { Link, useRouter} from 'expo-router';
 
 
 interface Props {
-  plato?: Plato;
-  idRestaurante: number,
+  plato: Plato;
 }
 
-const RegEditPlato = ({ plato , idRestaurante }: Props) => {
+const RegEditPlato = ({plato}: Props) => {
 
 
 
-  const [nombre, setNombre] = useState(plato?.nombre || '');
-  const [precio, setPrecio] = useState(plato?.precio.toString() || '');
-  const [foto, setFoto] = useState(plato?.foto || '');
+  const [nombre, setNombre] = useState(plato.nombre);
+  const [precio, setPrecio] = useState(plato.precio.toString());
+  const [foto, setFoto] = useState(plato.foto);
 
 
 
@@ -83,27 +82,22 @@ const RegEditPlato = ({ plato , idRestaurante }: Props) => {
   const handleEditarPlato = async () => {
     try {
       const modificarPlato = {
-        id : plato?.id || 1,
-        id_restaurante: plato?.id_restaurante ||  1,
+        id : plato.id,
+        id_restaurante: plato.id_restaurante,
         nombre: nombre,
         precio: parseFloat(precio),
-        foto: plato?.foto || ""
-      };
-      const nuevoPlatoInsert = {
-        id_restaurante: idRestaurante,
-        nombre: nombre,
-        precio: parseFloat(precio),
-        foto: foto
+        foto: plato.foto 
       };
 
-      plato ? await editarPlato(plato.id, modificarPlato) : await insertarPlato(nuevoPlatoInsert);
+
+      await editarPlato(plato.id, modificarPlato)
     } catch (error) {
       console.error('Error al editar el plato:', error);
     }
     setNombre('');
     setPrecio('');
     setFoto('');
-    router.back();
+    router.navigate(`/adminIngreso`);
   };
 
 

@@ -89,13 +89,15 @@ const RegistrarPlato = ({ idRestaurante }: Props) => {
       };
 
       await insertarPlato(nuevoPlatoInsert);
+
     } catch (error) {
       console.error('Error al editar el plato:', error);
     }
     setNombre('');
     setPrecio('');
     setFoto('');
-    router.back();
+    router.navigate(`/adminIngreso`);
+
   };
 
 

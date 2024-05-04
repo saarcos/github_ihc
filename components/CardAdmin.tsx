@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { StyleSheet, Text, View, Image ,TouchableOpacity, Modal,ActivityIndicator } from 'react-native';
 import { FontAwesome ,Entypo } from '@expo/vector-icons';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import Colors from '@/constants/Colors';
@@ -18,6 +18,7 @@ interface CardsAtributos {
 const CardAdmin = (props : CardsAtributos) => {
     const {titles , content,imageUrl , id ,idRestaurante} = props;
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const router = useRouter();
     const deleteMutation=useMutation({mutationFn: ({ idReserva }: { idReserva: number }) => eliminarPlato(idReserva),
     onSuccess: () => {
       console.log('Plato eliminada corectamente');

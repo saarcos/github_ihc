@@ -25,9 +25,7 @@ const Page = () =>{
     });
   }, []);
   const {id}=useLocalSearchParams<{id:string}>();
-  const {idRestaurante}=useLocalSearchParams<{idRestaurante:string}>();
   const idComoNumero = parseInt(id); 
-  const idRestauranteComoNumero = 6; 
   const { data: plato, isLoading } = useQuery({
     queryKey: ['plato', idComoNumero],
     queryFn: () => getPlatoByID(idComoNumero)
@@ -46,8 +44,7 @@ const Page = () =>{
 
   return (
     <View>
-        <RegEditPlato plato={plato} idRestaurante={idRestauranteComoNumero}  />
-
+        {plato && <RegEditPlato plato={plato} />}
     </View>
   );
 };
