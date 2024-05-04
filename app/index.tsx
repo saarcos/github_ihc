@@ -142,27 +142,27 @@ const Page = () => {
 					</View>
 				</View>
 				<Text style={styles.label}>Contraseña:</Text>
-          <View style={styles.inputContainer}>
-            <View style={styles.inputWrapper}>
-              <Ionicons name="lock-closed" size={20} color="#777" style={styles.icon} />
-			  <TextInput
-					onChangeText={(text) => setPassword(text)}
-					style={styles.input}
-					placeholder="contraseña"
-					secureTextEntry={!showPassword}
-				/>
-				<TouchableOpacity onPress={toggleMostrarContraseña}>
-					<Ionicons
-						name={showPassword ? 'eye-off' : 'eye'}
-						size={20}
-						color="#777"
-						style={styles.icon}
-					/>
-				</TouchableOpacity>
+				<View style={styles.inputContainer}>
+					<View style={styles.inputWrapper}>
+						<Ionicons name="lock-closed" size={20} color="#777" style={styles.icon} />
+						<TextInput
+							onChangeText={(text) => setPassword(text)}
+							style={styles.input}
+							placeholder="contraseña"
+							secureTextEntry={!showPassword}
+						/>
+						<TouchableOpacity onPress={toggleMostrarContraseña}>
+							<Ionicons
+								name={showPassword ? 'eye-off' : 'eye'}
+								size={20}
+								color="#777"
+								style={styles.icon}
+							/>
+						</TouchableOpacity>
 
-            </View>
-          </View>
-			
+					</View>
+				</View>
+
 
 				<TouchableOpacity style={[defaultStyles.btn]} onPress={SignIn}>
 					<Text style={[defaultStyles.btnText]}>Ingresar</Text>
@@ -291,8 +291,8 @@ const styles = StyleSheet.create({
 		height: 55,
 		paddingHorizontal: 10,
 		backgroundColor: 'white',
-		borderRadius:30
-	
+		borderRadius: 30
+
 	},
 })
 export default Page;
