@@ -62,8 +62,8 @@ const perfil: React.FC = () => {
       <View style={styles.info}>
         <View style={{ flexDirection: 'row', marginTop: 15 }}>
           <View >
-              {plato ? (
-                <MenuAdminRestaurante plato={plato} id={idComoNumero}  />
+              {idComoNumero ? (
+                <MenuAdminRestaurante  id={idComoNumero}  />
               ) : (
                 <Text>No se encontró ningún restaurante con el ID proporcionado.</Text>
               )}
@@ -124,4 +124,22 @@ const styles = StyleSheet.create({
     fontFamily:'appfont-bold',
     fontSize:22
   },
+  verMenuButton: {
+        borderRadius: 90,
+        borderWidth:1,
+        borderColor:'red',
+        backgroundColor: "white",
+        color:'red',
+        justifyContent: 'center',
+        alignItems: 'center',
+        width: 250, 
+        height: 45,
+        marginRight: 10,
+      },
+      
+      verMenuButtonLabel: {
+        color:'red',
+        fontSize: 14, 
+        fontFamily: 'appfont-bold',
+      },
 });

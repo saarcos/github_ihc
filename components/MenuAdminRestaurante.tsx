@@ -19,7 +19,6 @@ import Animated, {
 
 
 interface Props {
-  plato: Plato,
   id:number
 }
 
@@ -30,51 +29,58 @@ const MenuAdminRestaurante = ({ id }: Props) => {
   
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
 
-      const { data: platos } = useQuery({queryKey:['plato',id],queryFn:()=> getPlatoRestauranteByID(id)});
+      const { data: platos , refetch  } = useQuery({queryKey:['plato',id],queryFn:()=> getPlatoRestauranteByID(id)});
  
       const platoArray = Array.isArray(platos) ? platos : [platos];
 
 
-    
   return (
     
-      <Animated.ScrollView contentContainerStyle={styles.container} ref={scrollRef} scrollEventThrottle={16}>
-
-            {platoArray.map((item, index) => {
-                    return (
-                    <View key={index} style={styles.containercard}>
-                        <View style={{ flexDirection: 'row' }}>
-                        <CardAdmin
-                            titles={item.nombre}
-                            content={`Precio: $${item.precio}`}
-                            imageUrl={item.foto}
-                            id={item.id}
-                            idRestaurante={item.id_restaurante}
-                        />
-                        </View>
-                        
-                    </View>
-                    );
-                })}
-                <View style={{alignItems:'center'}}>
-                  <Link href={`/editarPlato/${null}`} asChild>
-                    <Button
-                      mode="contained"
-                      style={styles.verMenuButton}
-                      labelStyle={styles.verMenuButtonLabel} 
-                    >
-                      Añadir Plato
-                    </Button>
-                </Link>
-                </View>
-      </Animated.ScrollView>
+    <View style={styles.container}>
+        <Animated.ScrollView contentContainerStyle={styles.container} ref={scrollRef} scrollEventThrottle={16}>
+              {platos !== undefined ? (
+                  platoArray.map((item, index) => (
+                      <View key={index} style={styles.containercard}>
+                          <View style={{ flexDirection: 'row' }}>
+                              <CardAdmin
+                                  titles={item.nombre}
+                                  content={`Precio: $${item.precio}`}
+                                  imageUrl={item.foto}
+                                  id={item.id}
+                                  idRestaurante={item.id_restaurante}
+                              />
+                          </View>
+                      </View>
+                  ))
+              ) : (
+                  <View style={{ alignItems: 'center' }}>
+                      <Text>No hay platos disponibles.</Text>
+                  </View>
+              )}
+              <View style={{alignItems:'center'}}>
+                  <Link href={`/registrarPlato/${id}`} asChild>
+                      <Button
+                          mode="contained"
+                          style={styles.verMenuButton}
+                          labelStyle={styles.verMenuButtonLabel} 
+                      >
+                          Añadir Plato
+                      </Button>
+                  </Link>
+              </View>
+          </Animated.ScrollView>
+    </View>
     
   );
 };
 
 const styles = StyleSheet.create({
     container: {
-        flexGrow: 1,
+        alignItems:'center',
+        justifyContent:'center',
+        textAlign:'center',
+        alignContent:'center',
+        
     },
     btnReserva:{
         justifyContent:'center',

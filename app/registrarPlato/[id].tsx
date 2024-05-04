@@ -1,16 +1,13 @@
 import { View, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { FlatList } from 'react-native-gesture-handler';
 import Colors from '@/constants/Colors';
-import restaurantesData from '@/assets/data/restaurantes.json';
-import MenuAdminRestaurante from '@/components/MenuAdminRestaurante';
-import {getPlatoRestauranteByID } from '../api/api';
-import { useQuery } from '@tanstack/react-query';
+import RegistrarPlato from '@/components/RegistrarPlato';
 import { gestureHandlerRootHOC } from 'react-native-gesture-handler';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-
-
+import { useQuery } from '@tanstack/react-query';
+import { getPlatoByID } from '../api/api';
+import LoadingSpinner from '@/components/LoadingSpinner';
 const Page = () =>{
   const navigation=useNavigation();
   useLayoutEffect(() => {
@@ -30,17 +27,15 @@ const Page = () =>{
   const {id}=useLocalSearchParams<{id:string}>();
   const idComoNumero = parseInt(id); 
 
+  
 
 
 
 
   return (
-    <View >
-      {idComoNumero ? (
-        <MenuAdminRestaurante  id={idComoNumero} />
-      ) : (
-        <Text>No se encontró ningún restaurante con el ID proporcionado.</Text>
-      )}
+    <View>
+        <RegistrarPlato  idRestaurante={idComoNumero}  />
+
     </View>
   );
 };
