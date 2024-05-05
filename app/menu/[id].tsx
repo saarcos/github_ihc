@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Restaurante, getRestauranteByID, getRestaurantes ,getPlatoRestauranteByID } from '../api/api';
 import { defaultStyles } from '@/constants/Styles';
 import { useQuery } from '@tanstack/react-query';
-
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const Page = () =>{
   const navigation=useNavigation();
@@ -25,30 +25,45 @@ const Page = () =>{
   }, []);
   const { id } = useLocalSearchParams<{ id: string }>(); // Obtiene el ID del restaurante de los parámetros de la URL
   const restauranteID = parseInt(id); // Convertir a número
-  const { data: restaurante} = useQuery({queryKey:['restaurante',restauranteID],queryFn:()=> getRestauranteByID(restauranteID)});
+  const { data: restaurante} = useQuery({queryKey:['restaurante',restauranteID],queryFn:()=> getRestauranteByID(restauranteID)});  
   const { data: plato } = useQuery({queryKey:['plato',restauranteID],queryFn:()=> getPlatoRestauranteByID(restauranteID)});
 
   // console.log('restaurante:', restaurante);
   // console.log('plato:', plato);
   return (
-    <View>
-      {restaurante && plato ?(
-        <MenuRestaurante restaurante={restaurante} plato={plato} />
-      ) : (
-        <View style={defaultStyles.container}>
-              <ActivityIndicator style={styles.spinner} size="large" color={Colors.dark} />
-        </View>
-      )}
+    <View style={styles.container}>
+      <View>
+        {restaurante && plato ? (
+          <MenuRestaurante restaurante={restaurante} />
+        ) : (
+          <View style={styles.loadingContainer}>
+            <LoadingSpinner />
+          </View>
+        )}
+      </View>
     </View>
   );
 };
 
+
+
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: 'white', // Fondo blanco
+  },
   headerStyle:{
     fontFamily:'appfont-bold',
     color:Colors.dark,
     textTransform:'capitalize',
     fontSize:20
+  },
+  loadingContainer: {
+    flex: 1,
+    marginTop:'100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white', // Fondo blanco
   },
   roundButton: {
     width: 40,
