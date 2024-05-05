@@ -4,6 +4,7 @@ import { useNavigation } from 'expo-router';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { app } from '../../firebase-config';
 import Colors from '@/constants/Colors';
+import { Picker } from '@react-native-picker/picker';
 import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { editarUsuarioR, obtenerIdUsuarioRPorCorreo, actualizarContraseñaUsuarioR, Restaurante } from '@/app/api/api';
 
@@ -251,14 +252,17 @@ const EditarPerfil = ({ restaurante}: Props) => {
         if (option === 'info') {
             return (
                 <View style={styles.form}>
-                    <TextInput
+                    <Picker
+                        selectedValue={categoria_id}
                         style={[styles.input, { backgroundColor: '#dddddd' }]}
-                        placeholder="Categoria"
-                        keyboardType="default"
-                        autoCapitalize="none"
-                        value={categoria_id}
-                        onChangeText={validarCategoria}
-                    />
+                        onValueChange={(itemValue: string, itemIndex: number) => validarCategoria(itemValue)}
+                    >
+                        <Picker.Item label="Seleccione una categoría" value="" />
+                        <Picker.Item label="Comida Rapida" value="1" />
+                        <Picker.Item label="Mariscos" value="19" />
+                        <Picker.Item label="Sushi" value="21" />
+                        <Picker.Item label="Mexicana" value="23" />
+                    </Picker>
                     <TextInput
                         style={[styles.input, { backgroundColor: '#dddddd' }]}
                         placeholder="Nombre"
