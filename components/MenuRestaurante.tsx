@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, ScrollView, TouchableOpacity,Image, Dimensions } from 'react-native';
 import {  Text, IconButton, Button ,  } from 'react-native-paper';
-import { BtnReserva , BtnUbicacion } from "./Button";
 import { EvilIcons } from '@expo/vector-icons';
-
+import { useQuery } from '@tanstack/react-query';
+import { MaterialIcons } from '@expo/vector-icons';
 import Card from "./Card";
 import { Link } from 'expo-router';
 import Colors from '@/constants/Colors';
@@ -14,7 +14,7 @@ import Animated, {
     useAnimatedStyle,
     useScrollViewOffset,
 } from 'react-native-reanimated';
-import { Restaurante , Plato  } from '@/app/api/api';
+import { Restaurante , getPlatoRestauranteByID } from '@/app/api/api';
 
 const { width } = Dimensions.get('window');
 const IMG_HEIGHT = 300;
@@ -23,16 +23,18 @@ const IMG_HEIGHT = 300;
   
 interface Props {
   restaurante: Restaurante;
-  plato: Plato;
+
 }
 
 
-const MenuRestaurante = ({ restaurante, plato }: Props) => {
+const MenuRestaurante = ({ restaurante }: Props) => {
     const [estrellas, setEstrellas] = useState<number>(4);
     const [maxEstrellas, setMaxEstrellas] = useState<number>(5);
     const estrella = 'https://github.com/tranhonghan/images/blob/main/star_corner.png?raw=true';
     const estrellaPintada = 'https://github.com/tranhonghan/images/blob/main/star_filled.png?raw=true';
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
+    const { data: plato } = useQuery({queryKey:['plato',restaurante.id],queryFn:()=> getPlatoRestauranteByID(restaurante.id)});
+
     const platoArray = Array.isArray(plato) ? plato : [plato];
 
     const pintarEstrellas = (numEstrellas: number) => {
@@ -98,32 +100,40 @@ const MenuRestaurante = ({ restaurante, plato }: Props) => {
                 </View>
             </View>
 
-            {platoArray.map((item, index) => {
-                if (index % 2 === 0) {
-                    const nextItem = platoArray[index + 1];
-                    return (
-                    <View key={index} style={styles.containercard}>
-                        <View style={{ flexDirection: 'row' }}>
-                        <Card
-                            titles={item.nombre}
-                            content={`Precio: $${item.precio}`}
-                            imageUrl={item.foto}
-                        />
-                        {nextItem && (
+            <View>
+                {plato ? (
+                    platoArray.map((item, index) => {
+                    if (index % 2 === 0) {
+                        const nextItem = platoArray[index + 1];
+                        return (
+                        <View key={index} style={styles.containercard}>
+                            <View style={{ flexDirection: 'row' }}>
                             <Card
-                            titles={nextItem.nombre}
-                            content={`Precio: $${nextItem.precio}`}
-                            imageUrl={nextItem.foto}
+                                titles={item.nombre}
+                                content={`Precio: $${item.precio}`}
+                                imageUrl={item.foto}
                             />
-                        )}
+                            {nextItem && (
+                                <Card
+                                titles={nextItem.nombre}
+                                content={`Precio: $${nextItem.precio}`}
+                                imageUrl={nextItem.foto}
+                                />
+                            )}
+                            </View>
                         </View>
-                        
+                        );
+                    } else {
+                        return null;
+                    }
+                    })
+                ) : (
+                    <View style={styles.noPlatosContainer}>
+                        <MaterialIcons name="no-food" size={224} color="black" />
+                        <Text style={styles.noPlatosText}>No hay platos aún</Text>
                     </View>
-                    );
-                } else {
-                    return null;
-                }
-                })}
+                )}
+                </View>
 
 
                     
@@ -137,6 +147,15 @@ const styles = StyleSheet.create({
     container: {
         flexGrow: 1,
     },
+    noPlatosContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: '25%', 
+      },
+      noPlatosText: {
+        marginTop: 8, 
+      },
     btnReserva:{
         justifyContent:'center',
         alignItems:'center',
