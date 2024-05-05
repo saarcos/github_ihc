@@ -61,9 +61,9 @@ const Process=({ restaurant }: Props) =>{
     const minutosActuales = ahora.getMinutes();
     const horaCierreString = restaurant.horaCierre.split(' ');
     const horaCierreNumero = parseInt(horaCierreString[0]);
-    const horaAperturaString = restaurant.horaApertura.split(' ');
+    const horaAperturaString = restaurant.horaApertura.split(':');
     const horaAperturaNumero = parseInt(horaAperturaString[0]);
-    
+    const minutosApertura=parseInt(horaAperturaString[1])
     let horaCierre = horaCierreNumero; 
     const horarios: Horario[] = [];
     if(selectedDate===initialSelectedDate){
@@ -81,12 +81,24 @@ const Process=({ restaurant }: Props) =>{
         }
       }
     }else{
-      for (let i = horaAperturaNumero; i <= horaCierre; i += 0.5) {
-        const horas = Math.floor(i);
-        const minutos = i % 1 === 0.5 ? '30' : '00'; // Si el decimal es 0.5, los minutos son 30, de lo contrario, son 00
-        const hora = horas > 12 ? `${horas - 12}:${minutos} pm` : `${horas}:${minutos} am`;
-        const horario: Horario = { id: i, hora };
-        horarios.push(horario);
+      console.log(minutosApertura);
+      let hora = horaAperturaNumero;
+      let minuto = minutosApertura;
+      let id = 0;
+      while (hora < horaCierre) {
+          // const am_pm = hora >= 12? 'pm' : 'am';
+          const horaDisplay = `${hora > 12? hora - 12 : hora}:${minuto.toString().padStart(2, '0')} ${hora >= 12? 'pm' : 'am'}`;
+          const horario: Horario = { id: id++, hora: horaDisplay };
+          horarios.push(horario);
+
+          if (minuto + 30 >= 60) {
+              // Si agregar 30 minutos excederá los 60 minutos, actualiza la hora y restablece el minuto
+              minuto = (minuto + 30) % 60;
+              hora++;
+          } else {
+              // De lo contrario, simplemente suma 30 minutos al minuto actual
+              minuto += 30;
+          }
       }
     }
     return horarios;
@@ -105,13 +117,16 @@ const Process=({ restaurant }: Props) =>{
   })
 
 
-  const renderHorario = ({ item }: { item: Horario }) => {
+  const renderHorario = React.memo(({ item }: { item: Horario }) => {
     return (
       <TouchableOpacity style={[styles.timeBtn, selectedTime == item.hora ? { backgroundColor: Colors.red } : null]} onPress={() => setSelectedTime(item.hora)}>
         <Text style={[styles.textButton, selectedTime == item.hora ? { color: "#fff" } : null]}>{item.hora}</Text>
       </TouchableOpacity>
     );
-  };
+  });
+  const MemoizedHorarioItem = React.memo(renderHorario);
+
+  
   const handleShowCalendarPress=()=>{
     setShowCalendar(true);
   }
@@ -200,8 +215,8 @@ const Process=({ restaurant }: Props) =>{
         horizontal={true}
         showsHorizontalScrollIndicator={false}
         data={horarios}
-        renderItem={renderHorario}
-      />
+        renderItem={({ item }) => <MemoizedHorarioItem item={item} />}
+        />
     )}
 
     <View style={{ padding: 10 }}>

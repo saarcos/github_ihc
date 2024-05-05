@@ -59,7 +59,9 @@ const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
                 fontSize: 15,
                 borderRadius:99,
                 padding:4,
-                backgroundColor: appointment.estado === 'confirmada' ?  Colors.confirmationGreen: Colors.orange,
+                backgroundColor: appointment.estado === 'confirmada' ? Colors.confirmationGreen : 
+                appointment.estado === 'cancelada' ? Colors.red : Colors.orange,
+                color: appointment.estado === 'cancelada' ? 'white' : 'black',
               }}>{appointment.estado}</Text>
         </View>
         
@@ -77,7 +79,7 @@ const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
                 <Ionicons name='people' size={20} color={Colors.red}/>
                 <Text style={{width:'78%',fontFamily:'appfont-light'}}>{appointment.num_personas}</Text>
             </View>
-            {isFutureAppointment &&(<View style={{alignSelf: 'flex-start',marginTop: 10}}>
+            {isFutureAppointment && appointment.estado!=='cancelada'&&(<View style={{alignSelf: 'flex-start',marginTop: 10}}>
               <TouchableOpacity style={styles.btnCancelarAppointment} onPress={handleEliminarReserva}><Text style={styles.btnText}>Cancelar Reserva</Text></TouchableOpacity>
             </View>)}
         </View>
