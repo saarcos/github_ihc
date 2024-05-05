@@ -54,17 +54,7 @@ const DrawerLayout = () => {
 				}
 					redirect={authState?.role !== Role.USER}
 				/>
-				<Tabs.Screen
-					name="adminPerfil"
-					options={{
-						tabBarActiveTintColor:"red",
-						tabBarActiveBackgroundColor: "white",
-						tabBarLabel:'Perfil',
-						tabBarIcon:({color,size})=><Ionicons name='person-circle-outline' color={color} size={size}/>
-					}
-				}
-					redirect={authState?.role !== Role.ADMIN}
-				/>
+
 
 				<Tabs.Screen
 					name="adminIngreso"
@@ -77,7 +67,17 @@ const DrawerLayout = () => {
 				}
 					redirect={authState?.role !== Role.ADMIN}
 				/>
-
+				<Tabs.Screen
+					name="adminPerfil"
+					options={{
+						tabBarActiveTintColor:"red",
+						tabBarActiveBackgroundColor: "white",
+						tabBarLabel:'Perfil',
+						tabBarIcon:({color,size})=><Ionicons name='person-circle-outline' color={color} size={size}/>
+					}
+				}
+					redirect={authState?.role !== Role.ADMIN}
+				/>
 				<Tabs.Screen
 					name="adminVista"
 					options={{

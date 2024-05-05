@@ -310,9 +310,10 @@ const Registro = ({ restaurante }: Props) => {
                 }}
                 onValueChange={(value) => validarCategoriaRestaurante(value)}
                 items={[
-                  { label: 'Categoria 1', value: '1' },
-                  { label: 'Categoria 2', value: '2' },
-                  { label: 'Categoria 3', value: '3' },
+                  { label: 'Comida Rapida', value: '1' },
+                  { label: 'Mariscos', value: '19' },
+                  { label: 'Sushi', value: '21' },
+                  { label: 'Mexicana', value: '23' },
                   // Agrega más opciones según sea necesario
                 ]}
               />

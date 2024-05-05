@@ -65,7 +65,20 @@ export  interface PlatoInsert {
     horaApertura: string;
     horaCierre: string;
   }
+  export interface UsuarioRModify {
+    categoria_id: number;
+    nombre: string;
+    direccion: string;
+    foto: string;
+    aforo: number;
+    horaApertura: string;
+    horaCierre: string;
+    
+  }
 
+  export interface UsuarioRPass {
+    password_restaurante?: string;
+  }
   // Interface para la tabla 'usuario'
   export interface Usuario {
     id: number;
@@ -372,6 +385,86 @@ export  interface PlatoInsert {
       throw new Error('Error al CREAR el restaurante.');
     }
   };
+
+
+
+  export const obtenerIdUsuarioRPorCorreo = async (correo: string) => {
+    try {
+        const response = await fetch(`${API_URL}/usuariosAdmin/${correo}`);
+        const data = await response.json();
+
+        if (response.ok) {
+            return data.id;
+        } else {
+            throw new Error('Error al obtener el ID del restaurante 1.');
+        }
+    } catch (error) {
+        throw new Error('Error al obtener el ID del restaurante 2.');
+    }
+  };
+
+
+
+
+  export const eliminarUsuarioR = async (id: number): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/restaurantes/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error al eliminar el restaurante.');
+      }
+    } catch (error) {
+      throw new Error('Error al eliminar el restaurante.');
+    }
+  };
+
+
+
+  export const obtenerUsuarioRestaurantePorId = async (id: number): Promise<Restaurante> => {
+    try {
+      const response = await fetch(`${API_URL}/restaurantes/${id}`);
+      if (!response.ok) {
+        throw new Error('Error al obtener el restaurante.');
+      }
+      const restaurante = await response.json();
+      return Array.isArray(restaurante) ? restaurante[0] : restaurante;
+    } catch (error) {
+      throw new Error('Error al obtener el restaurante.');
+    }
+  };
+  export const editarUsuarioR = async ( id: number, nuevoUsuario: UsuarioRModify): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/restaurantes/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevoUsuario),
+      });
+      if (!response.ok) {
+        throw new Error('Error al editar el restaurante.');
+      }
+    } catch (error) {
+      throw new Error('Error al editar el restaurante.');
+    }
+  };
+  export const actualizarContraseñaUsuarioR = async (id: number, nuevaPassword: UsuarioRPass): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/restaurantes/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevaPassword),
+      });
+      if (!response.ok) {
+        throw new Error('Error al actualizar la contraseña del restaurante.');
+      }
+    } catch (error) {
+        throw new Error('Error al actualizar la contraseña del restaurante.');
+    }
+};
 
   export const verificarCorreo = async (correo: string): Promise<{ esRestaurante: boolean, esUsuario: boolean }> => {
     try {
