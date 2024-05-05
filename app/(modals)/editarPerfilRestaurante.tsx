@@ -5,14 +5,16 @@ import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredentia
 import { app } from '../../firebase-config';
 import Colors from '@/constants/Colors';
 import { Picker } from '@react-native-picker/picker';
-import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { editarUsuarioR, obtenerIdUsuarioRPorCorreo, actualizarContraseñaUsuarioR, Restaurante } from '@/app/api/api';
+import { format } from 'date-fns';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface Props {
     restaurante?: Restaurante;
 }
 
-const EditarPerfil = ({ restaurante}: Props) => {
+const EditarPerfil = ({ restaurante }: Props) => {
 
     const navigation = useNavigation();
 
@@ -33,8 +35,8 @@ const EditarPerfil = ({ restaurante}: Props) => {
     const [direccion, setDireccion] = useState(restaurante?.direccion || '');
     const [foto, setFoto] = useState(restaurante?.foto || '');
     const [aforo, setAforo] = useState(restaurante?.aforo ? restaurante.aforo.toString() : '');
-    const [horaapertura, setHoraapertura] = useState(restaurante?.horaApertura || '');
-    const [horacierre, setHoracierre] = useState(restaurante?.horaCierre || '');
+    const [horaapertura, setHoraapertura] = useState(restaurante?.horaApertura ? new Date(restaurante.horaApertura) : new Date());
+    const [horacierre, setHoracierre] = useState(restaurante?.horaCierre ? new Date(restaurante.horaCierre) : new Date());
 
     const [selectedOption, setSelectedOption] = useState<Option | null>(null);
     const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
@@ -99,7 +101,7 @@ const EditarPerfil = ({ restaurante}: Props) => {
                     'La contraseña actual no coincide',
                     'Inténtelo nuevamente',
                     [
-                      { text: 'OK', onPress: () => console.log('OK Pressed') }
+                        { text: 'OK', onPress: () => console.log('OK Pressed') }
                     ],
                     { cancelable: false }
                 );
@@ -125,9 +127,8 @@ const EditarPerfil = ({ restaurante}: Props) => {
                         direccion: direccion,
                         foto: foto,
                         aforo: parseFloat(aforo),
-                        horaApertura: horaapertura,
-                        horaCierre: horacierre
-
+                        horaApertura:  format(horaapertura, 'HH:mm'),
+                        horaCierre: format(horacierre, 'HH:mm')
                     };
                     editarUsuarioR(idUsuario, modUsuario);
                     Alert.alert('Tu perfil se actualizó correctamente');
@@ -145,9 +146,10 @@ const EditarPerfil = ({ restaurante}: Props) => {
         setCategoria_id('');
         setFoto('');
         setAforo('');
-        setHoraapertura('');
-        setHoracierre('');
+        setHoraapertura(new Date()); // Reiniciar a una nueva fecha
+        setHoracierre(new Date()); // Reiniciar a una nueva fecha
     };
+
 
     const validarCategoria = (value: string) => {
         if (!/^\d+$/.test(value)) {
@@ -190,26 +192,38 @@ const EditarPerfil = ({ restaurante}: Props) => {
         }
         setFoto(value);
     };
-    const validarApertura = (value: string) => {
-        if (value.trim() === '') {
+    const validarApertura = (selectedDate: Date | undefined) => {
+        if (!selectedDate) {
             setHoraaperturaValido(false);
             setErrors(prevErrors => ({ ...prevErrors, horaapertura: 'Por favor ingresa una hora de apertura' }));
         } else {
+            const horaAperturaString = selectedDate.toLocaleTimeString();
             setHoraaperturaValido(true);
             setErrors(prevErrors => ({ ...prevErrors, horaapertura: '' }));
+            setHoraapertura(selectedDate);
         }
-        setHoraapertura(value);
     };
-    const validarCierre = (value: string) => {
-        if (value.trim() === '') {
+
+    const validarCierre = (selectedDate: Date | undefined) => {
+        if (!selectedDate) {
             setHoracierreValido(false);
             setErrors(prevErrors => ({ ...prevErrors, horacierre: 'Por favor ingresa una hora de cierre' }));
         } else {
+            const horaCierreString = selectedDate.toLocaleTimeString();
             setHoracierreValido(true);
             setErrors(prevErrors => ({ ...prevErrors, horacierre: '' }));
+            setHoracierre(selectedDate);
         }
-        setHoracierre(value);
     };
+    const handleIngresarHora = () => {
+        setHoraaperturaValido(true); // Después de hacer clic, cambiar el estado para dejar de mostrar el mensaje
+        setShowAperturaPicker(true); // Mostrar el selector de hora de apertura
+    };
+    const handleCierreHora = () => {
+        setHoracierreValido(true); // Después de hacer clic, cambiar el estado para dejar de mostrar el mensaje
+        setShowCierrePicker(true); // Mostrar el selector de hora de apertura
+    };
+
 
     const validarAforo = (value: string) => {
         if (value.trim() === '') {
@@ -235,7 +249,7 @@ const EditarPerfil = ({ restaurante}: Props) => {
         }
         setCurrentPassword(value);
     };
-    
+
     const validarNewPassword = (value: string) => {
         if (value.length < 7) {
             setNewPasswordValida(false);
@@ -246,7 +260,26 @@ const EditarPerfil = ({ restaurante}: Props) => {
         }
         setNewPassword(value);
     };
+
+
+    const [showAperturaPicker, setShowAperturaPicker] = useState(false);
+    const [showCierrePicker, setShowCierrePicker] = useState(false);
+    const onChangeApertura = (event: any, selectedDate: Date | undefined) => {
+        const currentDate = selectedDate || horaapertura;
+        setShowAperturaPicker(false); // Ocultar el selector de hora de apertura
+        validarApertura(currentDate); // Validar la hora de apertura seleccionada
+        setHoraaperturaValido(false); // Después de ingresar la hora, cambiar el estado para dejar de mostrar el mensaje
+        
+    };
     
+    // Función para manejar el cambio de hora de cierre
+    const onChangeCierre = (event: any, selectedDate: Date | undefined) => {
+        const currentDate = selectedDate || horacierre;
+        setShowCierrePicker(false); // Ocultar el selector de hora de cierre
+        validarCierre(currentDate); // Validar la hora de cierre seleccionada
+        setHoracierreValido(false); // Después de ingresar la hora, cambiar el estado para dejar de mostrar el mensaje
+
+    };
 
     const renderOptionForm = (option: Option) => {
         if (option === 'info') {
@@ -295,22 +328,53 @@ const EditarPerfil = ({ restaurante}: Props) => {
                         value={aforo}
                         onChangeText={validarAforo}
                     />
-                    <TextInput
-                        style={[styles.input, { backgroundColor: '#dddddd' }]}
-                        placeholder="Apertura"
-                        keyboardType="default"
-                        autoCapitalize="none"
-                        value={horaapertura}
-                        onChangeText={validarApertura}
-                    />
-                    <TextInput
-                        style={[styles.input, { backgroundColor: '#dddddd' }]}
-                        placeholder="Cierre"
-                        keyboardType="default"
-                        autoCapitalize="none"
-                        value={horacierre}
-                        onChangeText={validarCierre}
-                    />
+                    <View style={styles.horasContainer}>
+                        <View style={styles.horaContainer}>
+                            <Text style={styles.label2}>Hora de Apertura:</Text>
+                            <View style={styles.inputWrapper2}>
+                                <TouchableOpacity style={styles.inputContainer} onPress={handleIngresarHora}>
+                                    <Ionicons name="time" size={20} color="#777" style={styles.icon2} />
+                                    <Text style={styles.horaInput}>
+                                        {horaaperturaValido ? 'HH:MM Am' : format(horaapertura, 'HH:mm')}
+                                    </Text>
+                                </TouchableOpacity>
+                                {showAperturaPicker && (
+                                    <DateTimePicker
+                                        testID="dateTimePicker"
+                                        value={horaapertura}
+                                        mode="time"
+                                        is24Hour={true}
+                                        display="default"
+                                        onChange={onChangeApertura}
+                                    />
+                                )}
+                            </View>
+                            {errors.horaapertura && <Text style={styles.errorText}>{errors.horaapertura}</Text>}
+                        </View>
+                        <View style={styles.horaContainer}>
+                            <Text style={styles.label2}>Hora de Cierre:</Text>
+                            <View style={styles.inputWrapper2}>
+                                <TouchableOpacity style={styles.inputContainer} onPress={handleCierreHora}>
+                                    <Ionicons name="time" size={20} color="#777" style={styles.icon2} />
+                                    <Text style={styles.horaInput}>
+                                        {horacierreValido ? 'HH:MM Pm' : format(horacierre, 'HH:mm')}
+                                    </Text>
+                                </TouchableOpacity>
+                                {showCierrePicker && (
+                                    <DateTimePicker
+                                        testID="dateTimePicker"
+                                        value={horacierre}
+                                        mode="time"
+                                        is24Hour={true}
+                                        display="default"   
+                                        onChange={onChangeCierre}
+                                    />
+                                )}
+                            </View>
+                            {errors.horacierre && <Text style={styles.errorText}>{errors.horacierre}</Text>}
+                        </View>
+                    </View>
+
                 </View>
             );
         } else if (option === 'password') {
@@ -378,14 +442,14 @@ const EditarPerfil = ({ restaurante}: Props) => {
                 )}
             </View>
             <TouchableOpacity
-                style={[styles.button, 
-                    (selectedOption === 'info' && (!categoriaValido || !nombreValido || !direccionValido || !fotoValido || !aforoValido || !horaaperturaValido || !horacierreValido)) ||
+                style={[styles.button,
+                (selectedOption === 'info' && (!categoriaValido || !nombreValido || !direccionValido || !fotoValido || !aforoValido || !horaaperturaValido || !horacierreValido)) ||
                     (selectedOption === 'password' && (!currentPasswordValida || !newPasswordValida)) ? styles.disabledButton : null]}
-                onPress={handleUpdate}
                 disabled={
                     (selectedOption === 'info' && (!categoriaValido || !nombreValido || !direccionValido || !fotoValido || !aforoValido || !horaaperturaValido || !horacierreValido)) ||
                     (selectedOption === 'password' && (!currentPasswordValida || !newPasswordValida))
-                }>
+                }
+                onPress={handleUpdate}>
                 <Text style={styles.buttonText}>Actualizar</Text>
             </TouchableOpacity>
         </View>
@@ -397,53 +461,86 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 30,
+        backgroundColor: '#fff',
+        padding: 20,
+    },
+    backButton: {
+        marginLeft: 20,
     },
     optionsContainer: {
         width: '100%',
-        marginBottom: 20,
     },
     option: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 10,
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
     },
     optionText: {
-        marginLeft: 10,
-        fontSize: 16,
+        marginLeft: 20,
     },
     form: {
         marginTop: 20,
-        marginBottom: 20,
     },
     input: {
-        width: '100%',
-        height: 40,
-        borderColor: 'gray',
+        height: 50,
         borderWidth: 1,
-        paddingHorizontal: 10,
-        marginBottom: 10,
+        borderColor: '#ddd',
+        borderRadius: 5,
+        paddingHorizontal: 20,
+        marginBottom: 15,
     },
     button: {
         backgroundColor: Colors.primary,
-        paddingVertical: 10,
+        borderRadius: 5,
+        paddingVertical: 15,
         paddingHorizontal: 20,
-        borderRadius: 30,
+        marginTop: 20,
     },
     disabledButton: {
-        opacity: 0.5,
+        backgroundColor: '#ddd',
     },
     buttonText: {
-        color: 'white',
+        color: '#fff',
         fontWeight: 'bold',
+        textAlign: 'center',
     },
-    backButton: {
-        marginLeft: 10,
+    horasContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    horaContainer: {
+        flex: 1,
+    },
+    label2: {
+        fontSize: 18,
+        marginBottom: 5,
+    },
+    inputWrapper2: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    icon2: {
+        marginRight: 10,
+    },
+    horaInput: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 5,
+        paddingHorizontal: 20,
+        height: 50,
+        lineHeight: 50,
+    },
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
     },
     errorText: {
         color: 'red',
-        marginLeft: 15,
-        marginBottom: 5,
     },
 });
 

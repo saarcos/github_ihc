@@ -4,6 +4,7 @@ import { defaultStyles } from '@/constants/Styles';
 import RNPickerSelect from 'react-native-picker-select';
 import { Image, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+
 import * as ImagePicker from 'expo-image-picker'; // Para Expo
 import { storage } from "@/firebase-config";
 import { router, useLocalSearchParams, useNavigation } from 'expo-router';
