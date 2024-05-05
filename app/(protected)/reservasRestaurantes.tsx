@@ -53,26 +53,29 @@ const userAppointments = appointments
 ? appointments.filter(item => item.id_restaurante === usuario?.id)
 : [];
 
-// Ordenar las reservas del usuario por estado primero y luego por fecha de más nuevas a más antiguas
 const sortedAppointments = userAppointments.sort((a, b) => {
-    // Comparar por estado
-    if (a.estado === 'pendiente' && b.estado !== 'pendiente') {
-      return -1; // 'pendiente' va primero
-    } else if (a.estado !== 'pendiente' && b.estado === 'pendiente') {
-      return 1; // 'pendiente' va después
-    } else {
-      // Si los estados son iguales, comparar por fecha
-      const dateComparison = new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
-      if (dateComparison === 0) {
-        // Extraer las horas de las citas
-        const horaA = parseInt(a.hora.split(':')[0]);
-        const horaB = parseInt(b.hora.split(':')[0]);
-        // Comparar por hora
-        return horaB - horaA;
-      }
-      return dateComparison;
-    }
-  });
+  // Comparar por estado primero
+  if (a.estado === 'pendiente' && b.estado !== 'pendiente') {
+    return -1; // Colocar 'a' antes que 'b' si 'a' tiene estado pendiente y 'b' no
+  } else if (a.estado !== 'pendiente' && b.estado === 'pendiente') {
+    return 1; // Colocar 'b' antes que 'a' si 'b' tiene estado pendiente y 'a' no
+  }
+
+  // Si ambos tienen el mismo estado o ninguno tiene estado pendiente, comparar por fecha y hora
+  const [anioA, mesA, diaA] = a.fecha.split('-');
+  const [horaA, minutosA, meridianoA] = a.hora.split(/:| /);
+  const [anioB, mesB, diaB] = b.fecha.split('-');
+  const [horaB, minutosB, meridianoB] = b.hora.split(/:| /);
+
+  const dateTimeA = new Date(parseInt(anioA), parseInt(mesA) - 1, parseInt(diaA), 
+                             parseInt(horaA) + (meridianoA.toLowerCase() === 'pm' ? 12 : 0), 
+                             parseInt(minutosA));
+  const dateTimeB = new Date(parseInt(anioB), parseInt(mesB) - 1, parseInt(diaB), 
+                             parseInt(horaB) + (meridianoB.toLowerCase() === 'pm' ? 12 : 0), 
+                             parseInt(minutosB));
+
+  return dateTimeB.getTime() - dateTimeA.getTime(); // Ordenar de más nuevo a más antiguo
+});
 
 // Filtrar las reservas del usuario para el día de hoy
 const today = new Date();

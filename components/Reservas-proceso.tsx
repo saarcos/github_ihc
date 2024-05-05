@@ -81,7 +81,6 @@ const Process=({ restaurant }: Props) =>{
         }
       }
     }else{
-      console.log(minutosApertura);
       let hora = horaAperturaNumero;
       let minuto = minutosApertura;
       let id = 0;

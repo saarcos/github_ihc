@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import Colors from '@/constants/Colors';
 import moment from 'moment'; 
 import { Ionicons } from '@expo/vector-icons';
-import { Reserva,  ReservaInsert,  getRestauranteByID, updateReserva } from '@/app/api/api';
+import { Reserva,  ReservaInsert,  getRestauranteByID, getUsuarioByID, updateReserva } from '@/app/api/api';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
 interface Props{
@@ -12,12 +12,15 @@ interface Props{
 }
 const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
   const { data: restaurante} = useQuery({queryKey:['restauranteEncontrado',appointment.id_restaurante],queryFn:()=> getRestauranteByID(appointment.id_restaurante)});
+  const { data: usuario} = useQuery({queryKey:['usuarioEncontrado',appointment.id_usuario],queryFn:()=> getUsuarioByID(appointment.id_usuario)});
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const updateMutation=useMutation({mutationFn: ({ idReserva, reservacion }: { idReserva: number, reservacion:ReservaInsert}) => updateReserva(idReserva,reservacion ),
   onSuccess: () => {
     console.log('Reserva actualizada corectamente');
     setShowDeleteModal(false);
+    setShowUpdateModal(false);
     onReservaDeleted(); 
   },
   onError: (error: Error) => { 
@@ -92,11 +95,12 @@ const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
       <View style={{display:'flex', flexDirection:'row', gap:15, alignItems:'center'}}>
         <Image source={{uri: restaurante?.foto}} style={styles.imgCard}/>
         <View>
-            <Text style={{fontSize:16, fontFamily:'appfont-semi',maxWidth:'80%'}}>{restaurante?.nombre}</Text>
+            <Text style={{fontSize:16, fontFamily:'appfont-semi',maxWidth:'80%'}}>Usuario</Text>
             <View style={{display:'flex', flexDirection:'row', alignItems:'center', gap:5}}>
-                <Ionicons name='location' size={20} color={Colors.red}/>
-                <Text style={{maxWidth: '75%', fontFamily:'appfont-light'}}>{restaurante?.direccion}</Text>
+                <Ionicons name='person-circle' size={20} color={Colors.red}/>
+                <Text style={{maxWidth: '75%', fontFamily:'appfont-light'}}>{usuario?.nombre} {usuario?.apellido} </Text>
             </View>
+           
             <View style={{display:'flex', flexDirection:'row', alignItems:'center', gap:5}}>
                 <Ionicons name='people' size={20} color={Colors.red}/>
                 <Text style={{width:'78%',fontFamily:'appfont-light'}}>{appointment.num_personas}</Text>
@@ -111,6 +115,7 @@ const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
                 </TouchableOpacity>
             </View>
             )}
+            
         </View>
       </View>
       <Modal
