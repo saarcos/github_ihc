@@ -5,6 +5,11 @@ export interface Categoria{
     id:number;
     nombre:string;
 }
+export interface CategoriaInsert{
+  id:number;
+  nombre:string;
+}
+
   // Interface para la tabla 'plato'
 export  interface Plato {
     id: number;
@@ -487,6 +492,83 @@ export  interface PlatoInsert {
       return await response.json();
     } catch (error) {
       throw new Error('Error al verificar el usuario');
+    }
+  };
+  export const getPlatos = async (): Promise<Plato[]> => {
+    try {
+      const response: AxiosResponse<Plato[]> = await axios.get(`${API_URL}/platos`);
+      return response.data;
+    } catch (error:any) {
+      throw new Error('Error al obtener los platos: ' + error.message);
+    }
+  };
+
+export const getCategoria = async (): Promise<Categoria[]> => {
+    try {
+      const response: AxiosResponse<Categoria[]> = await axios.get(`${API_URL}/categorias`);
+      return response.data;
+    } catch (error:any) {
+      throw new Error('Error al obtener la categorias: ' + error.message);
+    }
+  };
+
+  export const getCategoriaByID = async (id: number): Promise<Categoria> => {
+    try {
+      const response = await fetch(`${API_URL}/categorias/${id}`);
+      if (!response.ok) {
+        throw new Error('Error al obtener el categorias.');
+      }
+      const data = await response.json();
+      return data as Restaurante;
+    } catch (error) {
+      throw new Error('Error al obtener la categorias con el id');
+    }
+  };
+
+  export const insertarCategoria = async ( nuevaCategoria: CategoriaInsert): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/categorias/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevaCategoria),
+      });
+      if (!response.ok) {
+        throw new Error('Error al INSERTAR la categoria.');
+      }
+    } catch (error) {
+      throw new Error('Error al INSERTAR la categoria.');
+    }
+  };
+
+  export const editarCategoria = async (id: number, nuevaCategoria: Categoria): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/categorias/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevaCategoria),
+      });
+      if (!response.ok) {
+        throw new Error('Error al editar la categorias.');
+      }
+    } catch (error) {
+      throw new Error('Error al editar la categoria.');
+    }
+  };
+
+  export const eliminarCategoria = async (id: number): Promise<void> => {
+    try {
+      const response = await fetch(`${API_URL}/categorias/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Error al eliminar las categorias.');
+      }
+    } catch (error) {
+      throw new Error('Error al eliminar las categorias.');
     }
   };
 

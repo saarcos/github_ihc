@@ -1,49 +1,60 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, ScrollView, Animated, ActivityIndicator } from 'react-native';
 import { Card, Text, IconButton, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { Restaurante } from '@/app/api/api';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface Props {
   restaurante: Restaurante;
+  isFavoriteView?: boolean; // Nuevo prop para indicar si es la vista de favoritos
 }
 
-const Restaurantes = ({ restaurante }: Props) => {
-  // const [imagena, imagenb] = useState<string[]>(restaurante.imagen);
+const Restaurantes = ({ restaurante, isFavoriteView }: Props) => {
   const [opacity] = useState(new Animated.Value(1));
-  const [favoritos, setFavoritos] = useState<boolean>(false);
   const [imagenCargando, setImagenCargando] = useState(true);
+  const [favoritosArray, setFavoritosArray] = useState<Restaurante[]>([]);
+  const [favoritos, setFavoritos] = useState<boolean>(false);
 
+  // Memoizar la función toggleFavorito para evitar re-renders innecesarios
+  const toggleFavorito = useCallback(async () => {
+    try {
+      const favoritosActuales = await AsyncStorage.getItem('favoritos') || '[]';
+      const nuevosFavoritos = JSON.parse(favoritosActuales);
+      const restauranteIndex = nuevosFavoritos.findIndex((r: Restaurante) => r.id === restaurante.id);
+      if (restauranteIndex !== -1) {
+        nuevosFavoritos.splice(restauranteIndex, 1);
+      } else {
+        nuevosFavoritos.push(restaurante);
+      }
+      await AsyncStorage.setItem('favoritos', JSON.stringify(nuevosFavoritos));
+      setFavoritosArray(nuevosFavoritos);
+      setFavoritos(restauranteIndex !== -1);
+    } catch (error) {
+      console.error('Error al manipular favoritos:', error);
+    }
+  }, [restaurante]);
 
-  // useEffect(() => {
-  //   const intervaloId = setInterval(() => {
-  //     Animated.timing(opacity, {
-  //       toValue: 0,
-  //       duration: 500,
-  //       useNativeDriver: true,
-  //     }).start(() => {
-  //       imagenb(imagenAnterior => {
-  //         const imagenActualIndex = imagenAnterior.findIndex(imagen => imagen === imagena[0]);
-  //         const imagenSiguiente = (imagenActualIndex + 1) % imagenAnterior.length;
-  //         return [imagenAnterior[imagenSiguiente]];
-  //       });
-  //       Animated.timing(opacity, {
-  //         toValue: 1,
-  //         duration: 500,
-  //         useNativeDriver: true,
-  //       }).start();
-  //     });
-  //   }, 5000);
+  useEffect(() => {
+    const cargarFavoritos = async () => {
+      try {
+        const favoritosActuales = await AsyncStorage.getItem('favoritos') || '[]';
+        const nuevosFavoritos = JSON.parse(favoritosActuales);
+        setFavoritosArray(nuevosFavoritos);
+        const esFavorito = nuevosFavoritos.some((r: Restaurante) => r.id === restaurante.id);
+        setFavoritos(esFavorito);
+      } catch (error) {
+        console.error('Error al cargar favoritos:', error);
+      }
+    };
+    cargarFavoritos();
+  }, [favoritosArray, restaurante]);
 
-  //   return () => clearInterval(intervaloId);
-  // }, []);
-
-  const toggleFavorito = () => {
-    setFavoritos(prevFavorito => !prevFavorito);
-  };
+  if (!isFavoriteView && !favoritos) {
+    return null; // Si no es vista de favoritos y no es favorito, no mostrar
+  }
 
   return (
     <View style={styles.container}>
@@ -57,7 +68,7 @@ const Restaurantes = ({ restaurante }: Props) => {
             />
           </View>
           {imagenCargando && (
-              <ActivityIndicator style={styles.spinner} size="large" color="gray" />
+            <ActivityIndicator style={styles.spinner} size="large" color="gray" />
           )}
           <Card.Content style={styles.cardContent}>
             <View style={styles.infoContainer}>
@@ -66,15 +77,14 @@ const Restaurantes = ({ restaurante }: Props) => {
               </View>
               <Text>{restaurante.direccion}</Text>
               <Link href={`/menu/${restaurante.id}`} asChild>
-              <Button
-                mode="contained"
-                style={styles.verMenuButton}
-                labelStyle={styles.verMenuButtonLabel} 
-              >
-                Ver Menú
-              </Button>
+                <Button
+                  mode="contained"
+                  style={styles.verMenuButton}
+                  labelStyle={styles.verMenuButtonLabel}
+                >
+                  Ver Menú
+                </Button>
               </Link>
-              
             </View>
             <View style={styles.iconoContainer}>
               <IconButton
@@ -83,6 +93,7 @@ const Restaurantes = ({ restaurante }: Props) => {
                     name={favoritos ? 'heart' : 'heart-outline'}
                     size={30}
                     color={favoritos ? 'red' : 'black'}
+                    
                   />
                 )}
                 onPress={toggleFavorito}
@@ -133,7 +144,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 20,
     marginRight: 10,
-    fontFamily: 'appfont-bold', 
+    fontFamily: 'appfont-bold',
   },
   iconoContainer: {
     marginLeft: 'auto',
@@ -143,16 +154,14 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.red,
     justifyContent: 'center',
     alignItems: 'center',
-    width: 150, 
+    width: 150,
     height: 40,
     marginRight: 10,
   },
-  
   verMenuButtonLabel: {
-    fontSize: 14, 
+    fontSize: 14,
     fontFamily: 'appfont-bold',
   },
-  
 });
 
 export default Restaurantes;
