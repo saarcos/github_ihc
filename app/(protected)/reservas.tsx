@@ -53,17 +53,23 @@ const userAppointments = appointments
 ? appointments.filter(item => item.id_usuario === usuario?.id)
 : [];
 
-// Ordenar las reservas del usuario por fecha de más nuevas a más antiguas
 const sortedAppointments = userAppointments.sort((a, b) => {
-const dateComparison = new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
-if (dateComparison === 0) {
-  // Extraer las horas de las citas
-  const horaA = parseInt(a.hora.split(':')[0]);
-  const horaB = parseInt(b.hora.split(':')[0]);
-  // Comparar por hora
-  return horaB - horaA;
-}
-return dateComparison;
+  // Dividir la fecha y la hora en partes separadas
+  const [anioA, mesA, diaA] = a.fecha.split('-');
+  const [horaA, minutosA, meridianoA] = a.hora.split(/:| /);
+  const [anioB, mesB, diaB] = b.fecha.split('-');
+  const [horaB, minutosB, meridianoB] = b.hora.split(/:| /);
+
+  // Crear objetos Date para comparar las fechas y horas
+  const dateTimeA = new Date(parseInt(anioA), parseInt(mesA) - 1, parseInt(diaA), 
+                             parseInt(horaA) + (meridianoA.toLowerCase() === 'pm' ? 12 : 0), 
+                             parseInt(minutosA));
+  const dateTimeB = new Date(parseInt(anioB), parseInt(mesB) - 1, parseInt(diaB), 
+                             parseInt(horaB) + (meridianoB.toLowerCase() === 'pm' ? 12 : 0), 
+                             parseInt(minutosB));
+
+  // Comparar por fecha y hora
+  return dateTimeB.getTime() - dateTimeA.getTime(); // Ordenar de más nuevo a más antiguo
 });
 
 // Filtrar las reservas del usuario para el día de hoy
