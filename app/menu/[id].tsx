@@ -33,7 +33,7 @@ const Page = () =>{
   return (
     <View style={styles.container}>
       <View>
-        {restaurante && plato ? (
+        {restaurante ? (
           <MenuRestaurante restaurante={restaurante} />
         ) : (
           <View style={styles.loadingContainer}>
