@@ -95,9 +95,9 @@ const MenuRestaurante = ({ restaurante }: Props) => {
 
                     </View>
                 </View>
-                <View style={styles.strellasContainer}>
+                {/* <View style={styles.strellasContainer}>
                     {pintarEstrellas(estrellas)}
-                </View>
+                </View> */}
             </View>
 
             <View>

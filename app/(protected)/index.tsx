@@ -39,7 +39,7 @@ const Page = () => {
             ),
             headerTitleStyle: styles.headerTitle,
             headerStyle: {
-                backgroundColor: '#803530',
+                backgroundColor: '#E5332A',
             },
         });
     }, []);

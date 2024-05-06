@@ -97,7 +97,7 @@ const appointmentsToday = sortedAppointments.filter(item => item.fecha >= todayF
           ),
           headerTitleStyle: styles.headerStyle,
           headerStyle: {
-            backgroundColor: '#803530', 
+            backgroundColor: '#E5332A', 
           },
         }}
       />

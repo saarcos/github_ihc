@@ -210,10 +210,13 @@ const MenuAdminRestaurante = ({ id }: Props) => {
                   ))
               ) : (
                   <View style={{ alignItems: 'center' }}>
-                      <Text>No hay platos disponibles.</Text>
+                      <View style={styles.noPlatosContainer}>
+                        <MaterialIcons name="no-food" size={224} color="black" />
+                        <Text style={styles.noPlatosText}>No hay platos aún</Text>
+                    </View>
                   </View>
               )}
-              <View style={{alignItems:'center'}}>
+              <View style={{alignItems:'center', marginLeft:'10%'}}>
                       <Button
                           mode="contained"
                           style={styles.verMenuButton}
@@ -329,6 +332,16 @@ const styles = StyleSheet.create({
       width: 100,
       height: 100,
       borderRadius: 10,
+    },
+    noPlatosContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: '25%', 
+      marginLeft:'10%'
+    },
+    noPlatosText: {
+      marginTop: 8, 
     },
 
       verMenuButton: {

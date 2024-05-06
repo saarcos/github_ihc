@@ -102,7 +102,7 @@ const appointmentsToday = sortedAppointments.filter(item => item.fecha >= todayF
           ),
           headerTitleStyle: styles.headerStyle,
           headerStyle: {
-            backgroundColor: '#803530', 
+            backgroundColor: '#E5332A', 
           },
         }}
       />
@@ -113,7 +113,7 @@ const appointmentsToday = sortedAppointments.filter(item => item.fecha >= todayF
       ) : (
         
         <View style={styles.noReservasContainer}>
-          <Ionicons name="calendar" size={50} color={Colors.wine} />
+          <Ionicons name="calendar" size={50} color={Colors.red} />
           <Text style={styles.noReservasText}>No tienes reservas aún</Text>
           
         </View>

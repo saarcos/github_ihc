@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 5,
     marginVertical: 10,
-    marginHorizontal: 13,
+    marginHorizontal: 5,
   },
   cardContent: {
     marginTop: 10,

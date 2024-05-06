@@ -37,7 +37,7 @@ const Perfil: React.FC = () => {
           >
             <Stop stopColor="#E5332A" />
             <Stop offset={0.12} stopColor="#BB342C" />
-            <Stop offset={1} stopColor="#803530" />
+            <Stop offset={1} stopColor="#E5332A" />
           </LinearGradient>
         </Defs>
       </Svg>
@@ -172,7 +172,7 @@ const Perfil: React.FC = () => {
       headerTitleStyle: styles.headerTitle,
       headerShadowVisible: false,
       headerStyle: {
-        backgroundColor: '#803530',
+        backgroundColor: '#E5332A',
       },
     })
   })
