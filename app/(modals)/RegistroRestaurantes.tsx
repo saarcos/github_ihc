@@ -52,11 +52,21 @@ const Registro = ({ restaurante }: Props) => {
     navigation.goBack();
   };
 
-  useLayoutEffect(()=>{
+  useLayoutEffect(() => {
     navigation.setOptions({
-      headerShown:false,
-    })
-  })
+      headerShadowVisible: false,
+      headerShown: true,
+      title: '',
+      headerLeft: () => (
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+          <MaterialIcons name="arrow-back" size={24} color={'white'} />
+        </TouchableOpacity>
+      ),
+      headerStyle: {
+        backgroundColor: '#E5332A',
+      },
+    });
+  }, [navigation]);
 
 
   const app = initializeApp(firebaseConfig);
@@ -254,48 +264,44 @@ const Registro = ({ restaurante }: Props) => {
   const SvgTop: React.FC = () => {
     return (
       <Svg
-      width={600}
-      height={760}
-      fill="none"
-      onPress={handlePress} // Asigna la función de navegación al evento onPress del SVG
-
-      >
-        <Path
-          fill="url(#a)"
-          d="M0 361.705V0h500v361.705c-209.843 105.578-420.768 43.991-500 0Z"
-
-        />
+      width={500}
+				height={300}
+				fill="none"
+			>
+				<Path
+					fill="url(#a)"
+					d="M0 258.36V0h500v258.36c-209.843 75.414-420.768 31.423-500 0Z"
+				/>
 
         <Defs>
           <LinearGradient
             id="a"
-            x1={400}
-            x2={0}
-            y1={0}
-            y2={360.557}
-            gradientUnits="userSpaceOnUse"
-          >
-            <Stop stopColor="#803530" />
-            <Stop offset={0.47} stopColor="#E5332A" />
-            <Stop offset={1} stopColor="#E5332A" />
+						x1={250}
+						x2={250}
+						y1={0}
+						y2={300}
+						gradientUnits="userSpaceOnUse"
+					>
+						<Stop offset={0.133} stopColor="#E5332A" />
+						<Stop offset={0.534} stopColor="#BC3A31" />
+						<Stop offset={0.84} stopColor="#953730" />
+						<Stop offset={1} stopColor="#803530" />
           </LinearGradient>
         </Defs>
         <SvgImage
-          x="225"
-          y="200"
-          width="165"
-          height="165"
+          x={100.5}
+					y={42.5}
+					width="195"
+					height="195"
           href={require('./Imagen/logoBlanco.png')}
         />
-        {/* Agrega el icono de flecha hacia atrás */}
-      <Ionicons name="arrow-back" size={24} color="black" style={styles.backIcon} />
       </Svg>
     );
   };
   return (
     <View style={styles.container}>
-      <View style={styles.container1}>
-        <SvgTop />
+      <View style={{ marginHorizontal: -30, marginTop: -180 }}>
+      <SvgTop />
       </View>
       <KeyboardAvoidingView style={styles.formContainer} behavior="padding">
         <ScrollView>
