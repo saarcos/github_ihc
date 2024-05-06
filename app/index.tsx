@@ -104,17 +104,13 @@ const Page = () => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 
 	const SignIn = async () => {
-		const [loading, setLoading] = useState(false); 
-	
 		try {
 			const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			// Validar el formato del correo electrónico y la longitud de la contraseña
 			if (!emailValid.test(email) || password.length < 7) {
 				Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 7 caracteres');
 				return;
 			}
-	
-			setLoading(true); 
-	
 			const { esRestaurante, esUsuario } = await verificarCorreo(email);
 			signInWithEmailAndPassword(auth, email, password)
 				.then((userCredential) => {
@@ -134,15 +130,12 @@ const Page = () => {
 				.catch(error => {
 					let errorMessage = 'Correo electrónico o contraseña incorrectos';
 					Alert.alert(errorMessage);
-				})
-				.finally(() => {
-					setLoading(false); // Establecer estado de carga a false cuando se completa el inicio de sesión
 				});
 		} catch (error) {
 			Alert.alert('Error', 'Ocurrió un error al verificar el correo. Por favor, inténtalo de nuevo más tarde.');
-			setLoading(false); // Establecer estado de carga a false en caso de error
 		}
 	};
+
 	return (
 			<KeyboardAvoidingView
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
