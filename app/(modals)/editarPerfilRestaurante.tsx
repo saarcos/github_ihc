@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
 import { useNavigation } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
-import { app } from '../../firebase-config';
-import Colors from '@/constants/Colors';
+import { app, storage } from '../../firebase-config';
 import { Picker } from '@react-native-picker/picker';
-import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { AntDesign, FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { editarUsuarioR, obtenerIdUsuarioRPorCorreo, actualizarContraseñaUsuarioR, Restaurante } from '@/app/api/api';
 import { format } from 'date-fns';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import Colors from '@/constants/Colors';
 
 interface Props {
     restaurante?: Restaurante;
@@ -77,6 +79,48 @@ const EditarPerfil = ({ restaurante }: Props) => {
         }
     };
 
+    async function pickImage() {
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [3, 4],
+            quality: 1,
+        });
+
+        if (!result.canceled) {
+            setFoto(result.assets[0].uri);
+            // upload the image
+            await uploadImage(result.assets[0].uri);
+        }
+    }
+    async function uploadImage(uri: string) {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+
+        const storageRef = ref(storage, "Img/" + new Date().getTime());
+        const uploadTask = uploadBytesResumable(storageRef, blob);
+
+        // listen for events
+        uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+                const progress =
+                    (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log("Upload is " + progress + "% done");
+            },
+            (errors) => {
+                // handle error
+            },
+            () => {
+                getDownloadURL(uploadTask.snapshot.ref).then(async (downloadURL) => {
+                    console.log("File available at", downloadURL);
+                    // save record
+                    setFoto(downloadURL);
+                });
+            }
+        );
+    }
+
     const handleChangePassword = async () => {
         const auth = getAuth(app);
         const currentUser = auth.currentUser;
@@ -127,7 +171,7 @@ const EditarPerfil = ({ restaurante }: Props) => {
                         direccion: direccion,
                         foto: foto,
                         aforo: parseFloat(aforo),
-                        horaApertura:  format(horaapertura, 'HH:mm'),
+                        horaApertura: format(horaapertura, 'HH:mm'),
                         horaCierre: format(horacierre, 'HH:mm')
                     };
                     editarUsuarioR(idUsuario, modUsuario);
@@ -269,9 +313,9 @@ const EditarPerfil = ({ restaurante }: Props) => {
         setShowAperturaPicker(false); // Ocultar el selector de hora de apertura
         validarApertura(currentDate); // Validar la hora de apertura seleccionada
         setHoraaperturaValido(false); // Después de ingresar la hora, cambiar el estado para dejar de mostrar el mensaje
-        
+
     };
-    
+
     // Función para manejar el cambio de hora de cierre
     const onChangeCierre = (event: any, selectedDate: Date | undefined) => {
         const currentDate = selectedDate || horacierre;
@@ -284,6 +328,7 @@ const EditarPerfil = ({ restaurante }: Props) => {
     const renderOptionForm = (option: Option) => {
         if (option === 'info') {
             return (
+                
                 <View style={styles.form}>
                     <Picker
                         selectedValue={categoria_id}
@@ -312,16 +357,22 @@ const EditarPerfil = ({ restaurante }: Props) => {
                         value={direccion}
                         onChangeText={validarDireccion}
                     />
+                    <Text style={styles.label}>Ingrese foto del Restaurante:</Text>
+                    {restaurante ? <View style={{ height: 200, margin: 10, position: 'relative' }}>
+                        {foto ? <Image source={{ uri: foto }} style={{ width: 230, height: 200 }} /> : null}
+                        <TouchableOpacity style={[styles.btnCamera, { position: 'absolute', bottom: 0, right: 0, margin: 10 }]} onPress={pickImage}>
+                            <AntDesign name="camera" size={24} color="white" />
+                        </TouchableOpacity>
+                    </View> :
+                        <View style={{ marginTop: 5, alignItems:'center'}}>
+                            {foto ? <Image source={{ uri: foto }} style={{ width: 230, height: 200 }} /> : <TouchableOpacity style={styles.btnCameraPlus} onPress={pickImage} >
+                                <MaterialIcons name="add-a-photo" size={94} color="gray" />
+                            </TouchableOpacity>}
+
+                        </View>}
+
                     <TextInput
-                        style={[styles.input, { backgroundColor: '#dddddd' }]}
-                        placeholder="Foto"
-                        keyboardType="default"
-                        autoCapitalize="none"
-                        value={foto}
-                        onChangeText={validarFoto}
-                    />
-                    <TextInput
-                        style={styles.input}
+                        style={[styles.input, { backgroundColor: '#dddddd' ,marginTop:10}]}
                         placeholder="Aforo"
                         keyboardType="phone-pad"
                         autoCapitalize="none"
@@ -366,7 +417,7 @@ const EditarPerfil = ({ restaurante }: Props) => {
                                         value={horacierre}
                                         mode="time"
                                         is24Hour={true}
-                                        display="default"   
+                                        display="default"
                                         onChange={onChangeCierre}
                                     />
                                 )}
@@ -391,7 +442,7 @@ const EditarPerfil = ({ restaurante }: Props) => {
     const handleUpdate = () => {
         setSelectedOption(null);
         if (selectedOption === 'info') {
-            if (categoriaValido && nombreValido && direccionValido && fotoValido && aforoValido && horaaperturaValido && horacierreValido) {
+            if (categoriaValido && nombreValido && direccionValido  && aforoValido ) {
                 handleChangeInfo();
             } else {
                 Alert.alert('Por favor, completa todos los campos correctamente.');
@@ -414,97 +465,62 @@ const EditarPerfil = ({ restaurante }: Props) => {
         <View style={styles.container}>
             <View style={styles.optionsContainer}>
                 <TouchableOpacity onPress={() => toggleOption('info')} style={styles.option}>
-                    <FontAwesome5 name="envelope" size={24} color={selectedOption === 'info' ? Colors.primary : 'black'} />
-                    <Text style={styles.optionText}>Actualizar perfil</Text>
+                    <FontAwesome5 name="envelope" size={20} color={selectedOption === 'info' ? Colors.primary : 'black'} />
+                    <Text style={styles.optionText}>Editar Información</Text>
                 </TouchableOpacity>
-                {selectedOption === 'info' && (
-                    <>
-                        {renderOptionForm('info')}
-                        {errors.categoria_id && <Text style={styles.errorText}>{errors.categoria_id}</Text>}
-                        {errors.nombre && <Text style={styles.errorText}>{errors.nombre}</Text>}
-                        {errors.direccion && <Text style={styles.errorText}>{errors.direccion}</Text>}
-                        {errors.foto && <Text style={styles.errorText}>{errors.foto}</Text>}
-                        {errors.aforo && <Text style={styles.errorText}>{errors.aforo}</Text>}
-                        {errors.horaapertura && <Text style={styles.errorText}>{errors.horaapertura}</Text>}
-                        {errors.horacierre && <Text style={styles.errorText}>{errors.horacierre}</Text>}
-                    </>
-                )}
                 <TouchableOpacity onPress={() => toggleOption('password')} style={styles.option}>
-                    <FontAwesome5 name="key" size={24} color={selectedOption === 'password' ? Colors.primary : 'black'} />
-                    <Text style={styles.optionText}>Cambiar contraseña</Text>
+                    <FontAwesome5 name="lock" size={20} color={selectedOption === 'password' ? Colors.primary : 'black'} />
+                    <Text style={styles.optionText}>Cambiar Contraseña</Text>
                 </TouchableOpacity>
-                {selectedOption === 'password' && (
-                    <>
-                        {renderOptionForm('password')}
-                        {errors.currentPassword && <Text style={styles.errorText}>{errors.currentPassword}</Text>}
-                        {errors.newPassword && <Text style={styles.errorText}>{errors.newPassword}</Text>}
-                    </>
-                )}
             </View>
-            <TouchableOpacity
-                style={[styles.button,
-                (selectedOption === 'info' && (!categoriaValido || !nombreValido || !direccionValido || !fotoValido || !aforoValido || !horaaperturaValido || !horacierreValido)) ||
-                    (selectedOption === 'password' && (!currentPasswordValida || !newPasswordValida)) ? styles.disabledButton : null]}
-                disabled={
-                    (selectedOption === 'info' && (!categoriaValido || !nombreValido || !direccionValido || !fotoValido || !aforoValido || !horaaperturaValido || !horacierreValido)) ||
-                    (selectedOption === 'password' && (!currentPasswordValida || !newPasswordValida))
-                }
-                onPress={handleUpdate}>
+            {renderOptionForm(selectedOption || 'info')}
+            <TouchableOpacity style={styles.button} onPress={handleUpdate}>
                 <Text style={styles.buttonText}>Actualizar</Text>
             </TouchableOpacity>
         </View>
     );
 };
 
+export default EditarPerfil;
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
         backgroundColor: '#fff',
         padding: 20,
     },
-    backButton: {
-        marginLeft: 20,
-    },
     optionsContainer: {
-        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 20,
     },
     option: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 20,
-        paddingVertical: 15,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
     },
     optionText: {
-        marginLeft: 20,
+        marginLeft: 10,
+        fontSize: 14,
     },
     form: {
-        marginTop: 20,
+        marginBottom: 20,
     },
     input: {
-        height: 50,
+        height: 40,
+        borderColor: 'gray',
         borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 5,
-        paddingHorizontal: 20,
-        marginBottom: 15,
+        padding: 10,
+        marginBottom: 10,
     },
-    button: {
-        backgroundColor: Colors.primary,
-        borderRadius: 5,
-        paddingVertical: 15,
-        paddingHorizontal: 20,
-        marginTop: 20,
+    label: {
+        fontSize: 16,
+        marginBottom: 5,
+        color: '#333',
     },
-    disabledButton: {
-        backgroundColor: '#ddd',
-    },
-    buttonText: {
-        color: '#fff',
-        fontWeight: 'bold',
+    label2: {
+        fontSize: 16,
+        marginBottom: 5,
+        color: '#333',
         textAlign: 'center',
     },
     horasContainer: {
@@ -513,35 +529,64 @@ const styles = StyleSheet.create({
     },
     horaContainer: {
         flex: 1,
-    },
-    label2: {
-        fontSize: 18,
-        marginBottom: 5,
+        marginRight: 5,
     },
     inputWrapper2: {
         flexDirection: 'row',
         alignItems: 'center',
-    },
-    icon2: {
-        marginRight: 10,
-    },
-    horaInput: {
-        flex: 1,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 5,
-        paddingHorizontal: 20,
-        height: 50,
-        lineHeight: 50,
+        justifyContent: 'center',
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        flex: 1,
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 5,
+        padding: 10,
+        marginBottom: 10,
+        width: '80%',
+        alignSelf: 'center',
+    },
+    horaInput: {
+        fontSize: 16,
+        color: '#777',
+    },
+    icon2: {
+        marginRight: 5,
     },
     errorText: {
         color: 'red',
+        fontSize: 12,
+        marginLeft: 5,
     },
+    button: {
+        backgroundColor: Colors.primary,
+        padding: 15,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginTop: 20,
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 18,
+    },
+    backButton: {
+        marginLeft: 10,
+    },
+    btnCamera: {
+        backgroundColor: '#03A9F4',
+        padding: 10,
+        borderRadius: 5,
+    },
+    btnCameraPlus: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        width: 250,
+        height: 180,
+        borderColor: 'gray',
+        borderWidth: 1,
+        borderRadius: 10,
+    }
 });
-
-export default EditarPerfil;
