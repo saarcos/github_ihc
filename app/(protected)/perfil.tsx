@@ -208,14 +208,6 @@ const Perfil: React.FC = () => {
           <View style={styles.separacion}></View>
 
           <View style={styles.menu}>
-            <Link href="/(modals)/Favoritos_layout" asChild>
-              <TouchableRipple onPress={handleRegisterPress}>
-                <View style={styles.menuItem}>
-                  <FontAwesome name="heart" size={20} color="#BC3A31" style={{ marginRight: 10 }} />
-                  <Text style={styles.textoIcono}>Tus Favoritos</Text>
-                </View>
-              </TouchableRipple>
-            </Link>
             <Link href="/(modals)/editarPerfil" asChild>
               <TouchableRipple onPress={handleRegisterPress}>
                 <View style={styles.menuItem}>

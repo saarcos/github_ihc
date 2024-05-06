@@ -86,19 +86,6 @@ const Restaurantes = ({ restaurante, isFavoriteView }: Props) => {
                 </Button>
               </Link>
             </View>
-            <View style={styles.iconoContainer}>
-              <IconButton
-                icon={() => (
-                  <MaterialCommunityIcons
-                    name={favoritos ? 'heart' : 'heart-outline'}
-                    size={30}
-                    color={favoritos ? 'red' : 'black'}
-                    
-                  />
-                )}
-                onPress={toggleFavorito}
-              />
-            </View>
           </Card.Content>
         </Card>
       </ScrollView>
