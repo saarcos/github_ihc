@@ -32,16 +32,7 @@ const Page = () => {
 
 	const navigation = useNavigation();
 
-	/*{useLayoutEffect(() => {
-		navigation.setOptions({
-		  headerShadowVisible: false,
-		  headerShown: true,
-		  title: '',
-		  headerStyle: {
-			backgroundColor: '#E5332A',
-		  },
-		});
-	  }, [navigation]);}*/
+
 
 	const handleRecoverPass = () => {
 		router.push({ pathname: './(modals)/recoverPassword' });
