@@ -17,12 +17,15 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { firebaseConfig } from 'firebase-config';
 import { Restaurante, insertarRestaurante } from '@/app/api/api';
 import { format } from 'date-fns';
+import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 interface Props {
   restaurante?: Restaurante;
 }
 
 const Registro = ({ restaurante }: Props) => {
+
+
 
   const router = useRouter();
   const [categoria, setcategoriaRestaurante] = useState(restaurante?.categoria_id ? restaurante.categoria_id.toString() : '');
@@ -42,12 +45,19 @@ const Registro = ({ restaurante }: Props) => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
 
-  const navigation = useNavigation();
-  useLayoutEffect(() => {
+  const navigation = useNavigation(); // Obtiene la navegación
+
+  const handlePress = () => {
+    // Navega hacia atrás cuando se presiona el componente SVG
+    navigation.goBack();
+  };
+
+  useLayoutEffect(()=>{
     navigation.setOptions({
-      headerShown: false,
+      headerShown:false,
     })
   })
+
 
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -244,9 +254,11 @@ const Registro = ({ restaurante }: Props) => {
   const SvgTop: React.FC = () => {
     return (
       <Svg
-        width={600}
-        height={760}
-        fill="none"
+      width={600}
+      height={760}
+      fill="none"
+      onPress={handlePress} // Asigna la función de navegación al evento onPress del SVG
+
       >
         <Path
           fill="url(#a)"
@@ -275,6 +287,8 @@ const Registro = ({ restaurante }: Props) => {
           height="165"
           href={require('./Imagen/logoBlanco.png')}
         />
+        {/* Agrega el icono de flecha hacia atrás */}
+      <Ionicons name="arrow-back" size={24} color="black" style={styles.backIcon} />
       </Svg>
     );
   };
@@ -540,6 +554,12 @@ const styles = StyleSheet.create({
     color: '#803530',
 
   },
+  backButton: {
+    padding: 10,
+    borderRadius: 5,
+    
+    // Otros estilos que puedas tener
+},
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -609,7 +629,11 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     marginBottom: 5,
   },
-
+  backIcon: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
+  },
 
 
 });
@@ -629,6 +653,7 @@ const pickerSelectStyles = StyleSheet.create({
     height: 55
 
   },
+  
 });
 
 export default Registro;

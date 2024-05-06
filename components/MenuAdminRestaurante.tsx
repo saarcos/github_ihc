@@ -103,7 +103,7 @@ const MenuAdminRestaurante = ({ id }: Props) => {
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
           allowsEditing: true,
-          aspect: [3, 4],
+          aspect: [5, 3],
           quality: 1,
         });
 

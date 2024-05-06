@@ -204,7 +204,7 @@ const Perfil: React.FC = () => {
           <View style={styles.info}>
             <View style={styles.fila}>
               <FontAwesome name="map" size={20} color="#777777" style={{ marginRight: 10 }} />
-              <Text style={{ color: "#777777", marginLeft: 20 }}>0{direccion}</Text>
+              <Text style={{ color: "#777777", marginLeft: 20 }}>{direccion}</Text>
             </View>
             <View style={styles.fila}>
               <MaterialIcons name="email" size={20} color="#777777" style={{ marginRight: 10 }} />

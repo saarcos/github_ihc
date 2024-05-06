@@ -78,17 +78,7 @@ const DrawerLayout = () => {
 				}
 					redirect={authState?.role !== Role.ADMIN}
 				/>
-				<Tabs.Screen
-					name="adminVista"
-					options={{
-						tabBarActiveTintColor:"red",
-						tabBarActiveBackgroundColor: "white",
-						tabBarLabel:'Vista',
-						tabBarIcon:({color,size})=><Ionicons name='person-circle-outline' color={color} size={size}/>
-					}
-				}
-					redirect={authState?.role !== Role.ADMIN}
-				/>
+
 				<Tabs.Screen
 					name="reservasRestaurantes"
 					options={{
