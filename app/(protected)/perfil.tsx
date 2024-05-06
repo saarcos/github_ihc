@@ -12,7 +12,7 @@ import { getAuth, onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../../firebase-config';
 import { obtenerIdUsuarioPorCorreo, eliminarUsuario, obtenerUsuarioPorId } from '@/app/api/api';
-
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const Perfil: React.FC = () => {
   function SvgTop() {
@@ -68,12 +68,7 @@ const Perfil: React.FC = () => {
     return unsubscribe;
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-        obtenerUsuario().then(() => setLoading(false));
-    });
-    return unsubscribe;
-  }, [navigation]);
+ 
 
   useEffect(() => {
     obtenerUsuario().then(() => setLoading(false));
@@ -182,7 +177,7 @@ const Perfil: React.FC = () => {
       {/* Renderizar solo si hay un usuario autenticado */}
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#E5332A" />
+            <LoadingSpinner />
         </View>
       ) : currentUser ? (
         <>

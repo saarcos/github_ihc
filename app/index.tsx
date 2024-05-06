@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect} from 'react';
 import { Svg, Path, Defs, LinearGradient, Stop, Image } from 'react-native-svg';
 import { Text, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View, Alert, BackHandler } from 'react-native';
 import { useAuth } from '../context/AuthContext';
-import { Link, router, useRouter } from 'expo-router';
+import { Link, router, useRouter, useNavigation } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { defaultStyles } from '@/constants/Styles';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { getAuth, signInWithEmailAndPassword, User, initializeAuth, getReactNativePersistence } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../firebase-config';
@@ -18,6 +18,7 @@ const auth = initializeAuth(app, {
 	persistence: getReactNativePersistence(AsyncStorage)
 });
 
+
 const Page = () => {
 	const router = useRouter();
 
@@ -28,6 +29,19 @@ const Page = () => {
 		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
 		return () => backHandler.remove();
 	}, []);
+
+	const navigation = useNavigation();
+
+	/*{useLayoutEffect(() => {
+		navigation.setOptions({
+		  headerShadowVisible: false,
+		  headerShown: true,
+		  title: '',
+		  headerStyle: {
+			backgroundColor: '#E5332A',
+		  },
+		});
+	  }, [navigation]);}*/
 
 	const handleRecoverPass = () => {
 		router.push({ pathname: './(modals)/recoverPassword' });
@@ -90,13 +104,17 @@ const Page = () => {
 	const [currentUser, setCurrentUser] = useState<User | null>(null);
 
 	const SignIn = async () => {
+		const [loading, setLoading] = useState(false); 
+	
 		try {
 			const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-			// Validar el formato del correo electrónico y la longitud de la contraseña
 			if (!emailValid.test(email) || password.length < 7) {
 				Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 7 caracteres');
 				return;
 			}
+	
+			setLoading(true); 
+	
 			const { esRestaurante, esUsuario } = await verificarCorreo(email);
 			signInWithEmailAndPassword(auth, email, password)
 				.then((userCredential) => {
@@ -116,12 +134,15 @@ const Page = () => {
 				.catch(error => {
 					let errorMessage = 'Correo electrónico o contraseña incorrectos';
 					Alert.alert(errorMessage);
+				})
+				.finally(() => {
+					setLoading(false); // Establecer estado de carga a false cuando se completa el inicio de sesión
 				});
 		} catch (error) {
 			Alert.alert('Error', 'Ocurrió un error al verificar el correo. Por favor, inténtalo de nuevo más tarde.');
+			setLoading(false); // Establecer estado de carga a false en caso de error
 		}
 	};
-
 	return (
 			<KeyboardAvoidingView
 				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

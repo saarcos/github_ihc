@@ -9,20 +9,27 @@ const Card = (props : CardsAtributos) => {
     const {titles , content,imageUrl} = props
 
     return (
-      <View style={styles.card}>
-        <Image
-          style={styles.image}
-          source={{ uri: imageUrl }} 
-        />
-        <View style={styles.cardContent}>
-          <Text style={styles.title}>{titles}</Text>
-          <Text>{content}</Text>
+      <View style={styles.container}>
+          <View style={styles.card}>
+            <Image
+              style={styles.image}
+              source={{ uri: imageUrl }}
+            />
+            <View style={styles.cardContent}>
+              <Text style={styles.title}>{titles}</Text>
+              <Text>{content}</Text>
+            </View>
+          </View>
         </View>
-      </View>
     );
   }
   
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   card: {
     backgroundColor: '#E4E4E5',
     width: 170,
@@ -33,7 +40,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 5,
     marginVertical: 10,
-    marginHorizontal: 5,
   },
   cardContent: {
     marginTop: 10,

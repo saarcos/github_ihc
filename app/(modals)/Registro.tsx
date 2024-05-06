@@ -176,7 +176,7 @@ const Registro = ({ usuario}: Props) => {
           </LinearGradient>
         </Defs>
         <Image
-          x={100.5}
+          x={150}
 					y={42.5}
 					width="195"
 					height="195"

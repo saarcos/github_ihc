@@ -71,12 +71,7 @@ const Perfil: React.FC = () => {
     return unsubscribe;
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-        obtenerUsuarioR().then(() => setLoading(false));
-    });
-    return unsubscribe;
-  }, [navigation]);
+
 
   useEffect(() => {
     obtenerUsuarioR().then(() => setLoading(false));
