@@ -66,21 +66,22 @@ const Process=({ restaurant }: Props) =>{
     const minutosApertura=parseInt(horaAperturaString[1])
     let horaCierre = horaCierreNumero; 
     const horarios: Horario[] = [];
-    if(selectedDate===initialSelectedDate){
-      for (let i = horaActual; i < horaCierre; i++) {
-        for (let j = 0; j < 60; j += 30) {
-          if (i === horaActual && j < minutosActuales) {
-            continue; // Saltar los minutos pasados para la hora actual
+    if (selectedDate === initialSelectedDate) {
+      const horaInicio = Math.max(horaActual, horaAperturaNumero); // La hora de inicio es la máxima entre la hora actual y la hora de apertura
+      for (let i = horaInicio; i < horaCierre; i++) {
+          for (let j = 0; j < 60; j += 30) {
+              if (i === horaActual && j < minutosActuales) {
+                  continue; // Saltar los minutos pasados para la hora actual
+              }
+              const horas = i > 12 ? i - 12 : i;
+              const am_pm = i >= 12 ? 'pm' : 'am';
+              const minutos = j === 0 ? '00' : j.toString();
+              const hora = `${horas}:${minutos} ${am_pm}`;
+              const horario: Horario = { id: i + j / 100, hora };
+              horarios.push(horario);
           }
-          const horas = i > 12 ? i - 12 : i;
-          const am_pm = i >= 12 ? 'pm' : 'am';
-          const minutos = j === 0 ? '00' : j.toString();
-          const hora = `${horas}:${minutos} ${am_pm}`;
-          const horario: Horario = { id: i + j / 100, hora };
-          horarios.push(horario);
-        }
       }
-    }else{
+  }else{
       let hora = horaAperturaNumero;
       let minuto = minutosApertura;
       let id = 0;
