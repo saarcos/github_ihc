@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, ActivityIndicator} from 'react-native'
+import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, ActivityIndicator, Linking} from 'react-native'
 import React, { useState } from 'react'
 import Colors from '@/constants/Colors';
 import moment from 'moment'; 
@@ -64,38 +64,43 @@ const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
   // Comprobar si la cita está en el futuro o si es hoy pero aún no ha ocurrido
   const isFutureAppointment = fullAppointmentDateTime.isAfter(today) || fullAppointmentDateTime.isSame(today, 'day') && appointmentTime.isAfter(today);
   
-  // console.log("Fecha cita: ",appointmentDate, "Hora Cita: "+appointmentTime, "Fecha actual: ",today, "Resultado: ",isFutureAppointment)
-
+  const openWhatsApp = () => {
+    const phoneNumber = usuario?.telefono;
+    if (phoneNumber) {
+      Linking.openURL(`whatsapp://send?phone=${phoneNumber}`);
+    } else {
+      console.error('No se proporcionó un número de teléfono válido.');
+    }
+  };
 
   return (
-  <View style={[styles.card, isFutureAppointment ? null : styles.reservaPasada]}>
-      <View style={{justifyContent:'space-between', flexDirection:'row', alignItems:'center'}}>
-        <Text style={{fontSize:18, fontFamily:'appfont-semi', marginTop:10}}>Fecha: {appointment.fecha}</Text>
-        <Text style={{fontFamily:'appfont-light', color:Colors.wine, fontSize:15}}>{appointment.hora}</Text>
-      </View>
-      <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 2}}>
-        <Text style={{fontFamily: 'appfont-semi', fontSize: 15, marginRight: 5}}>Estado: </Text>
-        <View style={{
-            borderRadius: 99, 
-            overflow: 'hidden', 
-          }}>
-            <Text style={{
-                fontFamily: 'appfont-light',
-                fontSize: 15,
-                borderRadius:99,
-                padding:4,
-                backgroundColor: appointment.estado === 'confirmada' ? Colors.confirmationGreen : 
-                appointment.estado === 'cancelada' ? Colors.red : Colors.orange,
-                color: appointment.estado === 'cancelada' ? 'white' : 'black',
-            }}>{appointment.estado}</Text>
+    <View style={[styles.card, isFutureAppointment ? null : styles.reservaPasada]}>
+        <View style={{justifyContent:'space-between', flexDirection:'row', alignItems:'center'}}>
+          <Text style={{fontSize:18, fontFamily:'appfont-semi', marginTop:10}}>Fecha: {appointment.fecha}</Text>
+          <Text style={{fontFamily:'appfont-light', color:Colors.wine, fontSize:15}}>{appointment.hora}</Text>
         </View>
-        
-  </View>
+        <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 2}}>
+          <Text style={{fontFamily: 'appfont-semi', fontSize: 15, marginRight: 5}}>Estado: </Text>
+          <View style={{
+              borderRadius: 99, 
+              overflow: 'hidden', 
+            }}>
+              <Text style={{
+                  fontFamily: 'appfont-light',
+                  fontSize: 15,
+                  borderRadius:99,
+                  padding:4,
+                  backgroundColor: appointment.estado === 'confirmada' ? Colors.confirmationGreen : 
+                  appointment.estado === 'cancelada' ? Colors.red : Colors.orange,
+                  color: appointment.estado === 'cancelada' ? 'white' : 'black',
+              }}>{appointment.estado}</Text>
+          </View>    
+    </View>
       <View style={styles.divider} />
       <View style={{display:'flex', flexDirection:'row', gap:15, alignItems:'center'}}>
         <Image source={{uri: restaurante?.foto}} style={styles.imgCard}/>
         <View>
-            <Text style={{fontSize:16, fontFamily:'appfont-semi',maxWidth:'80%'}}>Usuario</Text>
+            <Text style={{fontSize:16, fontFamily:'appfont-semi',maxWidth:'80%'}}>Cliente</Text>
             <View style={{display:'flex', flexDirection:'row', alignItems:'center', gap:5}}>
                 <Ionicons name='person-circle' size={20} color={Colors.red}/>
                 <Text style={{maxWidth: '75%', fontFamily:'appfont-light'}}>{usuario?.nombre} {usuario?.apellido} </Text>
@@ -105,6 +110,11 @@ const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
                 <Ionicons name='people' size={20} color={Colors.red}/>
                 <Text style={{width:'78%',fontFamily:'appfont-light'}}>{appointment.num_personas}</Text>
             </View>
+            {isFutureAppointment && appointment.estado!=='cancelada'&&(
+              <TouchableOpacity onPress={openWhatsApp} style={{marginTop: 10}}>
+              <Text style={{color: Colors.wine, textDecorationLine: 'underline', fontFamily: 'appfont-light'}}>Contactar por WhatsApp</Text>
+            </TouchableOpacity>
+            )}
             {isFutureAppointment && appointment.estado==='pendiente'&& (
             <View style={{ flexDirection: 'row', marginTop: 10, gap:5 }}>
                 <TouchableOpacity style={styles.btnCancelarAppointment} onPress={handleEliminarReserva}>
@@ -115,6 +125,7 @@ const AppointmentCardItem = ({appointment, onReservaDeleted}:Props) => {
                 </TouchableOpacity>
             </View>
             )}
+             
             
         </View>
       </View>

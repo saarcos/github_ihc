@@ -59,34 +59,39 @@ const Process=({ restaurant }: Props) =>{
     const ahora = new Date();
     const horaActual = ahora.getHours();
     const minutosActuales = ahora.getMinutes();
-    const horaCierreString = restaurant.horaCierre.split(' ');
+    const horaCierreString = restaurant.horaCierre.split(':');
     const horaCierreNumero = parseInt(horaCierreString[0]);
     const horaAperturaString = restaurant.horaApertura.split(':');
     const horaAperturaNumero = parseInt(horaAperturaString[0]);
-    const minutosApertura=parseInt(horaAperturaString[1])
+    const minutosApertura=parseInt(horaAperturaString[1]);
+    const minutosCierre=parseInt(horaCierreString[1]);
+    console.log("Abre: ", horaAperturaNumero+":"+minutosApertura," Cierra: ",horaCierreNumero+":"+minutosCierre)
     let horaCierre = horaCierreNumero; 
     const horarios: Horario[] = [];
     if (selectedDate === initialSelectedDate) {
-      const horaInicio = Math.max(horaActual, horaAperturaNumero); // La hora de inicio es la máxima entre la hora actual y la hora de apertura
-      for (let i = horaInicio; i < horaCierre; i++) {
-          for (let j = 0; j < 60; j += 30) {
-              if (i === horaActual && j < minutosActuales) {
-                  continue; // Saltar los minutos pasados para la hora actual
-              }
-              const horas = i > 12 ? i - 12 : i;
-              const am_pm = i >= 12 ? 'pm' : 'am';
-              const minutos = j === 0 ? '00' : j.toString();
-              const hora = `${horas}:${minutos} ${am_pm}`;
-              const horario: Horario = { id: i + j / 100, hora };
-              horarios.push(horario);
-          }
-      }
+      let hora = Math.max(horaActual, horaAperturaNumero); // La hora de inicio es la máxima entre la hora actual y la hora de apertura
+      let minuto = minutosApertura;
+      let id = 0;
+      
+      while (hora < horaCierre || (hora === horaCierre && minuto <= 30 && minutosCierre !== 0)) {
+        if (hora > horaActual || (hora === horaActual && minuto >= minutosActuales)) {
+            const horaDisplay = `${hora > 12 ? hora - 12 : hora}:${minuto.toString().padStart(2, '0')} ${hora >= 12 ? 'pm' : 'am'}`;
+            const horario = { id: id++, hora: horaDisplay };
+            horarios.push(horario);
+        }
+    
+        if (minuto + 30 >= 60) {
+            minuto = (minuto + 30) % 60;
+            hora++;
+        } else {
+            minuto += 30;
+        }
+    }
   }else{
       let hora = horaAperturaNumero;
       let minuto = minutosApertura;
       let id = 0;
       while (hora < horaCierre) {
-          // const am_pm = hora >= 12? 'pm' : 'am';
           const horaDisplay = `${hora > 12? hora - 12 : hora}:${minuto.toString().padStart(2, '0')} ${hora >= 12? 'pm' : 'am'}`;
           const horario: Horario = { id: id++, hora: horaDisplay };
           horarios.push(horario);
