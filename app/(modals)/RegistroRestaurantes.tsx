@@ -198,12 +198,18 @@ const Registro = ({ restaurante }: Props) => {
   }
 
   const validarCorreo = (text: string) => {
-    if (!/\S+@\S+\.\S+/.test(text.trim())) {
+    const originalText = text;
+    const filteredText = text.replace(/\s+/g, '');
+
+    if (/[A-Z]/.test(originalText)) {
+      setErrors(prevErrors => ({ ...prevErrors, correo: 'No se permite el ingreso de mayúsculas' }));
+    } else if (!/\S+@\S+\.\S+/.test(filteredText)) {
       setErrors(prevErrors => ({ ...prevErrors, correo: 'Ingrese un correo electrónico válido' }));
     } else {
       setErrors(prevErrors => ({ ...prevErrors, correo: '' }));
     }
-    setCorreo(text);
+
+    setCorreo(filteredText.replace(/[A-Z]/g, ''));
   };
 
   const validarContraseña = (text: string) => {
