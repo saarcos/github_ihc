@@ -91,12 +91,22 @@ const MenuAdminRestaurante = ({ id }: Props) => {
       const [precio, setPrecio] = useState('');
       const [foto, setFoto] = useState( '');
       const [idpalto, setidpalto] = useState("");
+      const [messageError, setMessageErrot] = useState("Ingresa un nombre de Plato");
+      const [messageErrorPrecio, setMessageErroPrecio] = useState("");
+      const [messageErrorFoto, setMessageErroFoto] = useState("");
       const [idRestaurante, setRestaurante] = useState( '');
-
+      const precioFormateado = precio.replace(/,/g, '.').trim();
+      const precioValido = /^\d+(\.\d{1,2})?$/.test(precioFormateado);
       const handleNombreChange = (text: string) => {
         setNombre(text);
       };
       const handlePrecioChange = (text: string) => {
+        if (!precioValido) {
+          setMessageErroPrecio("El precio debe estar en el formato correcto, por ejemplo, 34.45");
+        }
+        if (precioFormateado == "") {
+          setMessageErroPrecio("Ingresa un precio de plato");
+        }
         setPrecio(text);
       };
       async function pickImage() {
@@ -144,35 +154,68 @@ const MenuAdminRestaurante = ({ id }: Props) => {
 
       const handleEditarPlato = async () => {
         try {
+
+
+          if (!precioValido) {
+            setMessageErroPrecio("El precio debe estar en el formato correcto, por ejemplo, 34.45");
+            return;
+          }
+          if (precioFormateado == "") {
+            setMessageErroPrecio("Ingresa un precio de plato");
+            return;
+          }
+          if(!foto){
+            setMessageErroFoto("Ingresa una foto")
+            return
+          }
           if(idpalto!){
             const nuevoPlatoModificar = {
               id:parseInt(idpalto),
               id_restaurante: id,
-              nombre: nombre,
-              precio: parseFloat(precio),
-              foto: foto,
+              nombre: nombre.trim(),
+              precio: parseFloat(precioFormateado),
+              foto: foto.trim(),
             };
             const idComoNumero = parseInt(idpalto);
-            await editarPlato(idComoNumero ,nuevoPlatoModificar);
+            if(nombre == "" || precioFormateado  == "" || foto == ""){
+              setMessageErrot("Ingresa un nombre de Plato")
+            }
+            else{
+              await editarPlato(idComoNumero ,nuevoPlatoModificar);
+              setshowIngresoModal(false);
+              refetchPlatos();
+              setNombre('');
+              setPrecio('');
+              setFoto('');
+              setMessageErroFoto('');
+
+            }
           }else{
             const nuevoPlatoInsert = {
               id_restaurante: id,
-              nombre: nombre,
+              nombre: nombre.trim(),
               precio: parseFloat(precio),
-              foto: foto
+              foto: foto.trim()
             };
-  
-            await insertarPlato(nuevoPlatoInsert);
+            if(nombre == "" || precio  == "" || foto == ""){
+              setMessageErrot("Ingresa un nombre de Plato")
+            }
+            else{
+              await insertarPlato(nuevoPlatoInsert);
+              setshowIngresoModal(false);
+              refetchPlatos();
+              setNombre('');
+              setPrecio('');
+              setFoto('');
+              setMessageErroFoto('');
+
+            }
           }
 
         } catch (error) {
           console.error('Error al editar el plato:', error);
         }
-        setNombre('');
-        setPrecio('');
-        setFoto('');
-        setshowIngresoModal(false)
-        refetchPlatos();
+        
 
       };
 
@@ -277,30 +320,42 @@ const MenuAdminRestaurante = ({ id }: Props) => {
                             </TouchableOpacity>}
                             
                         </View> }
-                        <View style={{ margin: 20, borderBottomWidth: 1, borderColor: '#E4E4E5', marginTop:30 }}>
-                          <Text style={{ fontWeight: 'bold' }}>Nombre</Text>
-                          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <Feather name="edit" size={20} color="black" />
-                            <TextInput
-                              style={styles.input}
-                              value={nombre}
-                              onChangeText={handleNombreChange}
-                              placeholder="Nombre del plato"
-                            />
+                        <Text style={{color:'red'}}>{messageErrorFoto}</Text>
+                        <View>
+                          <View style={styles.inputCorrecto}>
+                            <Text style={{ fontWeight: 'bold' }}>Nombre</Text>
+                            <View style={styles.inputError}>
+                              <Feather name="edit" size={20} color="black" />
+                              <TextInput
+                                style={nombre !== "" ? styles.input : styles.inputErrorNombre}
+                                value={nombre}
+                                onChangeText={handleNombreChange}
+                                placeholder="Nombre del plato"
+                              />
+                            </View>
+                            {nombre !== "" ? null:
+                                <Text style={styles.errorText}>{messageError}</Text>
+                              }
                           </View>
                         </View>
+                      
                         <View>
                           <Text style={{ fontWeight: 'bold' }}>Precio</Text>
                           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <FontAwesome name="dollar" size={24} color="black" />
                             <TextInput
-                              style={styles.inputPrecio}
+                              style={(precio.trim() === "" || !precioValido) ? styles.inputPrecioError : styles.inputPrecio}
                               value={precio}
                               onChangeText={handlePrecioChange}
                               placeholder="Precio"
                               keyboardType="numeric"
                             />
                           </View>
+                          {(precio.trim() === "" || !precioValido) ? 
+                            <Text style={styles.errorText}>{messageErrorPrecio}</Text> 
+                            : null
+                          }
+
                         </View>
                         <View style={{ flexDirection: 'row', marginTop:20 }}>
                             <TouchableOpacity  onPress={handleEditarPlato} style={[styles.btnGuardar,]}>
@@ -328,6 +383,38 @@ const MenuAdminRestaurante = ({ id }: Props) => {
 };
 
 const styles = StyleSheet.create({
+  errorText:{
+    color:'#E5332A'
+  },
+  inputCorrecto:{
+    margin:20,
+ 
+    marginTop:30
+  },
+  inputErrorV2:{
+    borderBottomWidth:1,
+    borderColor:'#E5332A',
+  },
+  inputError: {
+    flexDirection: 'row', 
+    alignItems: 'center',
+  },
+  inputErrorNombre: {
+    borderBottomWidth:1,
+    borderColor:'#E5332A',
+    height: 40,
+    paddingHorizontal: 10,
+    width: 200,
+  },
+  inputPrecioError: {
+    height: 40,
+    borderColor: '#E5332A',
+    borderWidth: 1,
+    paddingHorizontal: 10,
+    borderRadius: 50,
+    width: 200,
+  },
+  
     image: {
       width: 100,
       height: 100,
@@ -495,6 +582,8 @@ const styles = StyleSheet.create({
             height: '90%'
           },
           input: {
+            borderBottomWidth:1,
+            borderColor:'#E4E4E5',
             height: 40,
             paddingHorizontal: 10,
             width: 200,

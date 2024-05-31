@@ -65,7 +65,7 @@ const Process=({ restaurant }: Props) =>{
     const horaAperturaNumero = parseInt(horaAperturaString[0]);
     const minutosApertura=parseInt(horaAperturaString[1]);
     const minutosCierre=parseInt(horaCierreString[1]);
-    console.log("Abre: ", horaAperturaNumero+":"+minutosApertura," Cierra: ",horaCierreNumero+":"+minutosCierre)
+    // console.log("Abre: ", horaAperturaNumero+":"+minutosApertura," Cierra: ",horaCierreNumero+":"+minutosCierre)
     let horaCierre = horaCierreNumero; 
     const horarios: Horario[] = [];
     if (selectedDate === initialSelectedDate) {
@@ -91,7 +91,7 @@ const Process=({ restaurant }: Props) =>{
       let hora = horaAperturaNumero;
       let minuto = minutosApertura;
       let id = 0;
-      while (hora < horaCierre) {
+      while (hora < horaCierre|| (hora===horaCierre && minuto<=30&&minutosCierre !== 0)) {
           const horaDisplay = `${hora > 12? hora - 12 : hora}:${minuto.toString().padStart(2, '0')} ${hora >= 12? 'pm' : 'am'}`;
           const horario: Horario = { id: id++, hora: horaDisplay };
           horarios.push(horario);
@@ -110,16 +110,19 @@ const Process=({ restaurant }: Props) =>{
   }
   const horarios: Horario[] = generarHorarios();
 
+  const [errorModalMessage, setErrorModalMessage] = useState('');
+
+  const reservaMutation = useMutation({
+    mutationFn: ({ reservacion }: { reservacion: ReservaInsert }) => crearReserva(reservacion),
+    onSuccess: () => {
+      setModalVisible(true);
+    },
+    onError: (error: Error) => {
+      setErrorModalMessage(error.message);
+      setErrorModalVisible(true);
+    },
+  });
   
-  const reservaMutation=useMutation({mutationFn: ({ reservacion }: { reservacion: ReservaInsert }) => crearReserva(reservacion),
-  onSuccess: () => {
-    setModalVisible(true); 
-    
-  },
-  onError: (error: Error) => {
-    setErrorModalVisible(true);
-  },
-  })
 
 
   const renderHorario = React.memo(({ item }: { item: Horario }) => {
@@ -317,23 +320,23 @@ const Process=({ restaurant }: Props) =>{
           </View>
         </View>
       </Modal>
-    <Modal
-      visible={errorModalVisible}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={() => setErrorModalVisible(false)}
-    >
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
-        <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%', alignItems: 'center' }}>
-          <View style={{  padding:10,width: '100%', alignItems: 'center' }}>
-            <Text style={styles.modalText}>Error en la Reserva</Text>
-          </View>
-          <Text style={{ fontSize: 16, marginBottom: 20}}>Lo sentimos, no se pudo completar la reserva. Por favor, inténtalo con otro horario.</Text>
-          <TouchableOpacity onPress={() => setErrorModalVisible(false)} style={styles.btnEliminar}>
-            <Text style={{ color: 'white', fontSize: 16 }}>Cerrar</Text>
-          </TouchableOpacity>
-        </View>
+      <Modal
+  visible={errorModalVisible}
+  transparent={true}
+  animationType="fade"
+  onRequestClose={() => setErrorModalVisible(false)}
+>
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
+    <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10, width: '80%', alignItems: 'center' }}>
+      <View style={{ padding: 10, width: '100%', alignItems: 'center' }}>
+        <Text style={styles.modalText}>Error en la Reserva</Text>
       </View>
+      <Text style={{ fontSize: 16, marginBottom: 20 }}>{errorModalMessage}</Text>
+      <TouchableOpacity onPress={() => setErrorModalVisible(false)} style={styles.btnEliminar}>
+        <Text style={{ color: 'white', fontSize: 16 }}>Cerrar</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
 </Modal>
 
   </View>
