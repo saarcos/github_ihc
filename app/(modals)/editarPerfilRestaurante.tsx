@@ -6,11 +6,12 @@ import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredentia
 import { app, storage } from '../../firebase-config';
 import { Picker } from '@react-native-picker/picker';
 import { AntDesign, FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { editarUsuarioR, obtenerIdUsuarioRPorCorreo, actualizarContraseñaUsuarioR, Restaurante } from '@/app/api/api';
-import { format } from 'date-fns';
+import { editarUsuarioR, obtenerIdUsuarioRPorCorreo, obtenerUsuarioRestaurantePorId, actualizarContraseñaUsuarioR, Restaurante } from '@/app/api/api';
+import { format, parse } from 'date-fns';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import Colors from '@/constants/Colors';
+import Day from 'react-native-calendars/src/calendar/day';
 
 interface Props {
     restaurante?: Restaurante;
@@ -78,6 +79,34 @@ const EditarPerfil = ({ restaurante }: Props) => {
             return null;
         }
     };
+    useEffect(() => {
+        const cargarDatosUsuario = async () => {
+          const auth = getAuth(app);
+          const currentUser = auth.currentUser;
+          if (currentUser) {
+            const correo = currentUser.email;
+            setCurrentUserEmail(correo || '');
+            if (correo) {
+              const idUsuario = await obtenerIdUsuarioRPorCorreo(correo);
+              const usuario: Restaurante | null = await obtenerUsuarioRestaurantePorId(idUsuario);
+              if (usuario) {
+                setNombre(usuario.nombre || '');
+                setCategoria_id(usuario.categoria_id.toString() || '');
+                setDireccion(usuario.direccion || '');
+                setAforo(usuario.aforo.toString() || '');
+                setHoraapertura(parse(usuario.horaApertura, 'HH:mm', new Date()));
+                setHoracierre(parse(usuario.horaCierre, 'HH:mm', new Date()));
+                setFoto(usuario.foto || '');
+                validarNombre(usuario.nombre || ''); 
+                validarDireccion(usuario.direccion || ''); 
+
+              }
+            }
+          }
+        };
+        cargarDatosUsuario();
+      }, []);
+      
 
     async function pickImage() {
         let result = await ImagePicker.launchImageLibraryAsync({
@@ -442,7 +471,7 @@ const EditarPerfil = ({ restaurante }: Props) => {
     const handleUpdate = () => {
         setSelectedOption(null);
         if (selectedOption === 'info') {
-            if (categoriaValido && nombreValido && direccionValido  && aforoValido ) {
+            if (nombreValido && direccionValido  && aforoValido ) {
                 handleChangeInfo();
             } else {
                 Alert.alert('Por favor, completa todos los campos correctamente.');
