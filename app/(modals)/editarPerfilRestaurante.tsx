@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Alert, Image } from 'react-native';
-import { useNavigation } from 'expo-router';
+import { router, useNavigation } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { app, storage } from '../../firebase-config';
@@ -205,6 +205,8 @@ const EditarPerfil = ({ restaurante }: Props) => {
                     };
                     editarUsuarioR(idUsuario, modUsuario);
                     Alert.alert('Tu perfil se actualizó correctamente');
+                    router.back()
+                    
                 } else {
                     Alert.alert('No se pudo obtener el correo del usuario');
                 }
@@ -485,6 +487,7 @@ const EditarPerfil = ({ restaurante }: Props) => {
         } else {
             Alert.alert('Por favor, selecciona una opción para actualizar.');
         }
+        
     };
 
     const [currentPassword, setCurrentPassword] = useState('');
