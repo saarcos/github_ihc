@@ -11,6 +11,7 @@ import { Link, useRouter} from 'expo-router';
 import { getAuth, onAuthStateChanged, User, signOut } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../../firebase-config';
+import LoadingSpinner from '@/components/LoadingSpinner';
 import { obtenerIdUsuarioRPorCorreo, eliminarUsuarioR, obtenerUsuarioRestaurantePorId } from '@/app/api/api';
 
 const Perfil: React.FC = () => {
@@ -184,8 +185,8 @@ const Perfil: React.FC = () => {
       {/* Renderizar solo si hay un usuario autenticado */}
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#E5332A" />
-        </View>
+        <LoadingSpinner />
+    </View>
       ) : currentUser ? (
         <>
           <SvgTop />
@@ -314,7 +315,6 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+   
   },
 });
