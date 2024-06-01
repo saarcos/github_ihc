@@ -1,10 +1,10 @@
-import React, { useState, useLayoutEffect } from 'react';
+import React, { useState, useLayoutEffect, useEffect } from 'react';
 import { View, TextInput, TouchableOpacity, Text, StyleSheet, KeyboardAvoidingView, ScrollView, Alert } from 'react-native';
 import { defaultStyles } from '@/constants/Styles';
 import RNPickerSelect from 'react-native-picker-select';
 import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { Svg, Path, Defs, LinearGradient, Stop, Image } from 'react-native-svg';
-import { Link, useRouter} from 'expo-router'; // Importa Link desde expo-router
+import { Link, useRouter} from 'expo-router';
 import { Ionicons, MaterialIcons} from '@expo/vector-icons';
 import { getAuth, createUserWithEmailAndPassword} from 'firebase/auth';
 import {initializeApp} from 'firebase/app';
@@ -16,20 +16,19 @@ interface Props {
 }
 
 const Registro = ({ usuario}: Props) => {
-
   const router = useRouter();
-  const [nombre, setUsuario] = useState(usuario?.nombre|| '');
-  const [apellido, setApellido] = useState(usuario?.apellido|| '');
+  const [nombre, setUsuario] = useState(usuario?.nombre || '');
+  const [apellido, setApellido] = useState(usuario?.apellido || '');
   const [telefono, setTelefono] = useState(usuario?.telefono ? usuario.telefono.toString() : '');
-  const [email, setCorreo] = useState(usuario?.correo|| '');
-  const [password, setContraseña] = useState(usuario?.password_usuario|| '');
-  const [passwordMatch, setConfirmarContraseña] = useState(usuario?.password_usuario|| '');
+  const [email, setCorreo] = useState(usuario?.correo || '');
+  const [password, setContraseña] = useState(usuario?.password_usuario || '');
+  const [passwordMatch, setConfirmarContraseña] = useState(usuario?.password_usuario || '');
   const [showPassword, setMostrarContraseña] = useState<boolean>(false);
   const [showPasswordMatch, setMostrarConfirmarContraseña] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isFormValid, setIsFormValid] = useState(false);
 
-
-  const navigation=useNavigation();
+  const navigation = useNavigation();
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -52,14 +51,14 @@ const Registro = ({ usuario}: Props) => {
 
   const createAccount = () => {
     createUserWithEmailAndPassword(auth, email, password)
-    .then ((userCredential) => {
+    .then((userCredential) => {
       const user = userCredential.user;
     })
     .catch(error => {
-      Alert.alert(error);
-    })
+      Alert.alert(error.message);
+    });
   }
-  
+
   const handleCrearUsuario = async () => {
     try {
       const insertarUser = {
@@ -91,6 +90,7 @@ const Registro = ({ usuario}: Props) => {
       setErrors(prevErrors => ({ ...prevErrors, usuario: '' }));
     }
     setUsuario(text);
+    validateForm();
   };
 
   const validarApellido = (text: string) => {
@@ -100,9 +100,8 @@ const Registro = ({ usuario}: Props) => {
       setErrors(prevErrors => ({ ...prevErrors, apellido: '' }));
     }
     setApellido(text);
+    validateForm();
   };
-
-
 
   const validarTelefono = (text: string) => {
     if (!/^\d+$/.test(text.trim())) {
@@ -111,15 +110,22 @@ const Registro = ({ usuario}: Props) => {
       setErrors(prevErrors => ({ ...prevErrors, telefono: '' }));
     }
     setTelefono(text);
+    validateForm();
   };
 
   const validarCorreo = (text: string) => {
-    if (!/\S+@\S+\.\S+/.test(text.trim())) {
-      setErrors(prevErrors => ({ ...prevErrors, correo: 'Ingrese un correo electrónico válido' }));
+    const emailValid = /^[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*@[a-zA-Z0-9]+\.[A-Za-z]{2,}$/;
+    const trimmedEmail = text.trim();
+    const invalidCharsRegex = /[^\w.+-@]/;
+    if (/[A-Z]/.test(trimmedEmail)) {
+      setErrors(prevErrors => ({ ...prevErrors, correo: 'Los correos electrónicos no deben contener letras mayúsculas.' }));
+    } else if (!emailValid.test(trimmedEmail) || invalidCharsRegex.test(trimmedEmail)) {
+      setErrors(prevErrors => ({ ...prevErrors, correo: 'Por favor, ingresa un correo electrónico válido' }));
     } else {
       setErrors(prevErrors => ({ ...prevErrors, correo: '' }));
     }
     setCorreo(text);
+    validateForm();
   };
 
   const validarContraseña = (text: string) => {
@@ -129,6 +135,7 @@ const Registro = ({ usuario}: Props) => {
       setErrors(prevErrors => ({ ...prevErrors, contraseña: '' }));
     }
     setContraseña(text);
+    validateForm();
   };
 
   const validarConfirmarContraseña = (text: string) => {
@@ -138,6 +145,7 @@ const Registro = ({ usuario}: Props) => {
       setErrors(prevErrors => ({ ...prevErrors, confirmarContraseña: '' }));
     }
     setConfirmarContraseña(text);
+    validateForm();
   };
 
   const toggleMostrarContraseña = () => {
@@ -148,38 +156,54 @@ const Registro = ({ usuario}: Props) => {
     setMostrarConfirmarContraseña(!showPasswordMatch);
   };
 
+  const validateForm = () => {
+    setIsFormValid(
+      nombre.trim() !== '' &&
+      apellido.trim() !== '' &&
+      telefono.trim() !== '' &&
+      email.trim() !== '' &&
+      password.trim() !== '' &&
+      passwordMatch === password &&
+      Object.values(errors).every(error => error === '')
+    );
+  };
+
+  useEffect(() => {
+    validateForm();
+  }, [nombre, apellido, telefono, email, password, passwordMatch, errors]);
+
   const SvgTop: React.FC = () => {
     return (
       <Svg
-      width={500}
-				height={300}
-				fill="none"
-			>
-				<Path
-					fill="url(#a)"
-					d="M0 258.36V0h500v258.36c-209.843 75.414-420.768 31.423-500 0Z"
-				/>
+        width={500}
+        height={300}
+        fill="none"
+      >
+        <Path
+          fill="url(#a)"
+          d="M0 258.36V0h500v258.36c-209.843 75.414-420.768 31.423-500 0Z"
+        />
 
         <Defs>
           <LinearGradient
             id="a"
-						x1={250}
-						x2={250}
-						y1={0}
-						y2={300}
-						gradientUnits="userSpaceOnUse"
-					>
-						<Stop offset={0.133} stopColor="#E5332A" />
-						<Stop offset={0.534} stopColor="#BC3A31" />
-						<Stop offset={0.84} stopColor="#953730" />
-						<Stop offset={1} stopColor="#803530" />
+            x1={250}
+            x2={250}
+            y1={0}
+            y2={300}
+            gradientUnits="userSpaceOnUse"
+          >
+            <Stop offset={0.133} stopColor="#E5332A" />
+            <Stop offset={0.534} stopColor="#BC3A31" />
+            <Stop offset={0.84} stopColor="#953730" />
+            <Stop offset={1} stopColor="#803530" />
           </LinearGradient>
         </Defs>
         <Image
           x={150}
-					y={42.5}
-					width="195"
-					height="195"
+          y={42.5}
+          width="195"
+          height="195"
           href={require('./Imagen/logoBlanco.png')}
         />
       </Svg>
@@ -189,7 +213,7 @@ const Registro = ({ usuario}: Props) => {
   return (
     <View style={styles.container}>
       <View style={{ marginHorizontal: -30, marginTop: -180 }}>
-      <SvgTop />
+        <SvgTop />
       </View>
       <KeyboardAvoidingView style={styles.formContainer} behavior="padding">
         <ScrollView>
@@ -229,12 +253,12 @@ const Registro = ({ usuario}: Props) => {
                 onChangeText={validarTelefono}
                 value={telefono}
                 maxLength={10}
-                keyboardType="phone-pad" // Aquí establecemos el tipo de teclado como teléfono
+                keyboardType="phone-pad"
               />
             </View>
           </View>
           {errors.telefono && <Text style={styles.errorText}>{errors.telefono}</Text>}
-          
+
           <Text style={styles.label}>Correo:</Text>
           <View style={styles.inputContainer}>
             <View style={styles.inputWrapper}>
@@ -257,7 +281,7 @@ const Registro = ({ usuario}: Props) => {
                 placeholder="Contraseña"
                 onChangeText={validarContraseña}
                 value={password}
-                secureTextEntry={!showPassword} // Usa secureTextEntry basado en mostrarContraseña
+                secureTextEntry={!showPassword}
               />
               <TouchableOpacity onPress={toggleMostrarContraseña}>
                 <Ionicons
@@ -279,7 +303,7 @@ const Registro = ({ usuario}: Props) => {
                 placeholder="Confirmar Contraseña"
                 onChangeText={validarConfirmarContraseña}
                 value={passwordMatch}
-                secureTextEntry={!showPasswordMatch} // Usa secureTextEntry basado en mostrarContraseña
+                secureTextEntry={!showPasswordMatch}
               />
               <TouchableOpacity onPress={toggleMostrarConfirmarContraseña}>
                 <Ionicons
@@ -292,9 +316,21 @@ const Registro = ({ usuario}: Props) => {
             </View>
           </View>
           {errors.confirmarContraseña && <Text style={styles.errorText}>{errors.confirmarContraseña}</Text>}
-            <TouchableOpacity style={[defaultStyles.btn, { alignItems: 'center', justifyContent: 'center', alignContent: 'center' }]} onPress={handleCrearUsuario}>
-              <Text style={{ color: 'white', fontSize: 16 }}>Registrarse</Text>
-            </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              defaultStyles.btn,
+              { 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                alignContent: 'center', 
+                backgroundColor: isFormValid ? '#E5332A' : '#E5332A80'
+              }
+            ]}
+            onPress={handleCrearUsuario}
+            disabled={!isFormValid}
+          >
+            <Text style={{ color: 'white', fontSize: 16 }}>Registrarse</Text>
+          </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
     </View>
@@ -322,7 +358,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
-    
   },
   inputWrapper: {
     flexDirection: 'row',
@@ -339,9 +374,7 @@ const styles = StyleSheet.create({
     height: 55,
     paddingHorizontal: 10,
     backgroundColor: 'white',
-    borderRadius:30
-
-    
+    borderRadius: 30
   },
   label: {
     width: '100%',
@@ -349,7 +382,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'left',
     marginLeft: 15,
-    
   },
   icon: {
     marginHorizontal: 10,
@@ -377,10 +409,8 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     marginBottom: 5,
   },
- 
-
-  
 });
+
 const pickerSelectStyles = StyleSheet.create({
   inputAndroid: {
     fontSize: 16,
@@ -395,10 +425,7 @@ const pickerSelectStyles = StyleSheet.create({
     backgroundColor: 'white',
     marginLeft: 25,
     height: 55
-
   },
 });
-
-
 
 export default Registro;

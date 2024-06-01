@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useLayoutEffect} from 'react';
 import { Svg, Path, Defs, LinearGradient, Stop, Image } from 'react-native-svg';
-import { Text, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View, Alert, BackHandler } from 'react-native';
+import { Text, KeyboardAvoidingView, Platform, StyleSheet, TextInput, TouchableOpacity, View, Alert, BackHandler, ActivityIndicator} from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { Link, router, useRouter, useNavigation } from 'expo-router';
 import Colors from '@/constants/Colors';
@@ -11,217 +11,217 @@ import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../firebase-config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { verificarCorreo } from '@/app/api/api';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const app = initializeApp(firebaseConfig);
 
 const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage)
+	persistence: getReactNativePersistence(AsyncStorage)
 });
 
+
 const Page = () => {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState({ email: '', password: '' });
-  const { onLogin } = useAuth();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+	const router = useRouter();
+	const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const backAction = () => {
-      return true;
-    };
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    return () => backHandler.remove();
-  }, []);
+	useEffect(() => {
+		const backAction = () => {
+			return true;
+		};
+		const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+		return () => backHandler.remove();
+	}, []);
 
-  const navigation = useNavigation();
+	const navigation = useNavigation();
 
-  const handleRecoverPass = () => {
-    router.push({ pathname: './(modals)/recoverPassword' });
-  };
 
-  const handleRegisterUser = () => {
-    router.push({ pathname: '/(modals)/Registro' });
-  };
 
-  const handleRegisterAdmin = async () => {
-    router.push({ pathname: '/(modals)/RegistroRestaurantes' });
-  };
+	const handleRecoverPass = () => {
+		router.push({ pathname: './(modals)/recoverPassword' });
+	};
+	const handleRegisterUser = () => {
+		router.push({ pathname: '/(modals)/Registro' });
+	};
+	const handleRegisterAdmin = async () => {
+		router.push({ pathname: '/(modals)/RegistroRestaurantes' });
+	};
+	const [showPassword, setMostrarContraseña] = useState<boolean>(false);
+	const toggleMostrarContraseña = () => {
+		setMostrarContraseña(!showPassword);
+	};
 
-  const [showPassword, setMostrarContraseña] = useState<boolean>(false);
-  const toggleMostrarContraseña = () => {
-    setMostrarContraseña(!showPassword);
-  };
 
-  function SvgTop() {
-    return (
-      <Svg width={500} height={300} fill="none">
-        <Path
-          fill="url(#a)"
-          d="M0 258.36V0h500v258.36c-209.843 75.414-420.768 31.423-500 0Z"
-        />
-        <Defs>
-          <LinearGradient
-            id="a"
-            x1={250}
-            x2={250}
-            y1={0}
-            y2={300}
-            gradientUnits="userSpaceOnUse"
-          >
-            <Stop offset={0.133} stopColor="#E5332A" />
-            <Stop offset={0.534} stopColor="#BC3A31" />
-            <Stop offset={0.84} stopColor="#953730" />
-            <Stop offset={1} stopColor="#803530" />
-          </LinearGradient>
-        </Defs>
-        <Image
-          x={100.5}
-          y={42.5}
-          width="195"
-          height="195"
-          href={require('./(modals)/Imagen/logoBlanco.png')}
-        />
-      </Svg>
-    );
-  }
+	function SvgTop() {
+		return (
 
-  const validarCorreo = (text: string) => {
-    const originalText = text;
-    const filteredText = text.replace(/\s+/g, '');
+			<Svg
+				width={500}
+				height={300}
+				fill="none"
+			>
+				<Path
+					fill="url(#a)"
+					d="M0 258.36V0h500v258.36c-209.843 75.414-420.768 31.423-500 0Z"
+				/>
+				<Defs>
+					<LinearGradient
+						id="a"
+						x1={250}
+						x2={250}
+						y1={0}
+						y2={300}
+						gradientUnits="userSpaceOnUse"
+					>
+						<Stop offset={0.133} stopColor="#E5332A" />
+						<Stop offset={0.534} stopColor="#BC3A31" />
+						<Stop offset={0.84} stopColor="#953730" />
+						<Stop offset={1} stopColor="#803530" />
+					</LinearGradient>
+				</Defs>
+				<Image
+					x={100.5}
+					y={42.5}
+					width="195"
+					height="195"
+					href={require('./(modals)/Imagen/logoBlanco.png')}
+				/>
 
-    if (/[A-Z]/.test(originalText)) {
-      setErrors(prevErrors => ({ ...prevErrors, email: 'No se permite el ingreso de mayúsculas' }));
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(filteredText)) {
-      setErrors(prevErrors => ({ ...prevErrors, email: 'Ingrese un correo electrónico válido' }));
-    } else {
-      setErrors(prevErrors => ({ ...prevErrors, email: '' }));
-    }
 
-    setEmail(filteredText.replace(/[A-Z]/g, ''));
-  };
+			</Svg>
+		);
+	}
 
-  const SignIn = async () => {
-    try {
-      // Validar el correo electrónico
-      if (errors.email || email === '') {
-        Alert.alert('Error', errors.email || 'Por favor, ingresa un correo electrónico válido');
-        return;
-      }
+	const [email, setEmail] = useState('');
+	const [password, setPassword] = useState('');
+	const { onLogin } = useAuth();
+	const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-      // Validar la contraseña
-      if (password.length < 7) {
-        setErrors(prevErrors => ({ ...prevErrors, password: 'La contraseña debe tener al menos 7 caracteres' }));
-        Alert.alert('Error', 'La contraseña debe tener al menos 7 caracteres');
-        return;
-      }
+	const SignIn = async () => {
+		try {
+			const emailValid = /^[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*@[a-zA-Z0-9]+\.[A-Za-z]{2,}$/;
+			const trimmedEmail = email.trim();
+			const trimmedPassword = password.trim();
+			const invalidCharsRegex = /[^\w.+-@]/;
 
-      const { esRestaurante, esUsuario } = await verificarCorreo(email);
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          setCurrentUser(user);
-          router.push({ pathname: '/(protected)/perfil' });
-          if (esRestaurante) {
-            onLogin!('admin', 'admin');
-          } else if (esUsuario) {
-            onLogin!('user', 'user');
-          } else {
-            console.log('El correo no está registrado');
-          }
-          setEmail('');
-          setPassword('');
-        })
-        .catch(error => {
-          let errorMessage = 'Correo electrónico o contraseña incorrectos';
-          Alert.alert(errorMessage);
-        });
-    } catch (error) {
-      Alert.alert('Error', 'Ocurrió un error al verificar el correo. Por favor, inténtalo de nuevo más tarde.');
-    }
-  };
+			if (trimmedEmail === '' || trimmedPassword === '') {
+				Alert.alert('Error', 'Por favor, completa todos los campos.');
+				return;
+			}
+			if (email !== trimmedEmail || password !== trimmedPassword) {
+				Alert.alert('Error', 'No se permiten espacios en blanco. Por favor, vuelve a escribir tu correo o contraseña.');
+				return;
+			}
+			if (/[A-Z]/.test(trimmedEmail)) {
+				Alert.alert('Error', 'Los correos electrónicos no deben contener letras mayúsculas.');
+				return;
+			}
+			if (!emailValid.test(trimmedEmail) || invalidCharsRegex.test(trimmedEmail) || trimmedPassword.length < 7) {
+				Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 7 caracteres');
+				return;
+			}
+			setLoading(true);
+			const { esRestaurante, esUsuario } = await verificarCorreo(trimmedEmail);
+			signInWithEmailAndPassword(auth, trimmedEmail, trimmedPassword)
+				.then((userCredential) => {
+					const user = userCredential.user;
+					setCurrentUser(user);
+					if (esRestaurante) {
+						onLogin!('admin', 'admin');
+					} else if (esUsuario) {
+						onLogin!('user', 'user');
+					} else {
+						console.log('El correo no está registrado');
+					}
+					setEmail('');
+					setPassword('');
+					setLoading(false);
+				})
+				.catch(error => {
+					let errorMessage = 'Correo electrónico o contraseña incorrectos';
+					Alert.alert(errorMessage);
+					setLoading(false);
+				});
+		} catch (error) {
+			Alert.alert('Error', 'Ocurrió un error al verificar el correo. Por favor, inténtalo de nuevo más tarde.');
+			setLoading(false);
+		}
+	};
+	
 
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={{ marginHorizontal: -30, marginTop: -30 }}>
-        <SvgTop />
-      </View>
-      <View style={{ justifyContent: 'center', alignItems: 'center', padding: 10, borderRadius: 10 }}>
-        <Text style={{ fontSize: 16, color: 'black' }}>Iniciar Sesión</Text>
-      </View>
-
-      <Text style={styles.label}>Correo:</Text>
-      <View style={styles.inputContainer2}>
-  <View style={styles.inputWrapper2}>
-    <Ionicons name="mail-outline" size={20} color="#777" style={styles.icon} />
-    <TextInput
-      onChangeText={(text) => validarCorreo(text)}
-      value={email}
-      style={styles.input}
-      placeholder="usuario@email.com"
-    />
-  </View>
-  {errors.email ? (
-    <Text style={styles.error}>{errors.email}</Text>
-  ) : null}
-</View>
-
-      <Text style={styles.label}>Contraseña:</Text>
-      <View style={styles.inputContainer}>
-        <View style={styles.inputWrapper}>
-          <Ionicons name="lock-closed" size={20} color="#777" style={styles.icon} />
-          <TextInput
-            onChangeText={(text) => setPassword(text)}
-            value={password}
-            style={styles.input}
-            placeholder="contraseña"
-            secureTextEntry={!showPassword}
-          />
-          <TouchableOpacity onPress={toggleMostrarContraseña}>
-            <Ionicons
-              name={showPassword ? 'eye-off' : 'eye'}
-              size={20}
-              color="#777"
-              style={styles.icon}
-            />
-          </TouchableOpacity>
+	return (
+	<View style={styles.containerLoading}>
+		{loading ? (
+        <View style={styles.loadingContainer}>
+            <LoadingSpinner />
         </View>
-        {errors.password ? <Text style={styles.error}>{errors.password}</Text> : null}
-      </View>
+      	) : !loading && (
+		<KeyboardAvoidingView
+			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+			style={styles.container}>
+			<View style={{ marginHorizontal: -30, marginTop: -30 }}>
+				<SvgTop />
+			</View>
 
-      <TouchableOpacity style={[defaultStyles.btn]} onPress={SignIn}>
-        <Text style={[defaultStyles.btnText]}>Ingresar</Text>
-      </TouchableOpacity>
+			<View style={{ justifyContent: 'center', alignItems: 'center', padding: 10, borderRadius: 10 }}>
+				<Text style={{ fontSize: 16, color: loading ? 'transparent' : 'black' }}>Iniciar Sesión</Text>
+			</View>
 
-      <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 5 }}>
-        <TouchableOpacity onPress={handleRecoverPass}>
-          <Text style={styles.btnText}>¿Olvidaste tu contraseña?</Text>
-        </TouchableOpacity>
-      </View>
+			<View style={{ opacity: loading ? 0 : 1 }}>
+				<Text style={styles.label}>Correo:</Text>
+				<View style={styles.inputContainer}>
+					<View style={styles.inputWrapper}>
+					<Ionicons name="mail-outline" size={20} color="#777" style={styles.icon} />
+					<TextInput
+						onChangeText={(text) => setEmail(text)}
+						style={styles.input}
+						placeholder="usuario@email.com"
+					/>
+					</View>
+				</View>
+				<Text style={styles.label}>Contraseña:</Text>
+				<View style={styles.inputContainer}>
+					<View style={styles.inputWrapper}>
+					<Ionicons name="lock-closed" size={20} color="#777" style={styles.icon} />
+					<TextInput
+						onChangeText={(text) => setPassword(text)}
+						style={styles.input}
+						placeholder="contraseña"
+						secureTextEntry={!showPassword}
+					/>
+					<TouchableOpacity onPress={toggleMostrarContraseña}>
+						<Ionicons
+						name={showPassword ? 'eye-off' : 'eye'}
+						size={20}
+						color="#777"
+						style={styles.icon}
+						/>
+					</TouchableOpacity>
+					</View>
+				</View>
 
-      <View style={styles.separatorView}>
-        <View style={{
-          flex: 1,
-          borderBottomColor: '#000',
-          borderBottomWidth: StyleSheet.hairlineWidth
-        }} />
-      </View>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-          <Text style={[styles.texto]}>¿No tienes una cuenta? </Text>
-        </View>
-        <TouchableOpacity onPress={handleRegisterUser}>
-          <Text style={styles.btnText}>Registrarse como Usuario</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleRegisterAdmin}>
-          <Text style={styles.btnText}>Registrarse como Restaurante</Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
-  );
+				<TouchableOpacity style={[defaultStyles.btn]} onPress={SignIn}>
+					<Text style={[defaultStyles.btnText]}>Ingresar</Text>
+				</TouchableOpacity>
+
+				<View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 5 }}>
+					<TouchableOpacity onPress={handleRecoverPass}>
+					<Text style={styles.btnText}>¿Olvidaste tu contraseña?</Text>
+					</TouchableOpacity>
+				</View>
+
+				<View style={styles.separatorView}>
+					<View style={{ flex: 1, borderBottomColor: '#000', borderBottomWidth: StyleSheet.hairlineWidth }} />
+				</View>
+				<TouchableOpacity onPress={handleRegisterUser}>
+				<Text style={styles.btnText}>Registrarse como Usuario</Text>
+				</TouchableOpacity>
+				<TouchableOpacity onPress={handleRegisterAdmin}>
+				<Text style={styles.btnText}>Registrarse como Restaurante</Text>
+				</TouchableOpacity>
+			</View>
+		</KeyboardAvoidingView>)}
+	</View>
+);
 };
 
 const styles = StyleSheet.create({
@@ -318,28 +318,16 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 10,
 		backgroundColor: 'white',
 		borderRadius: 30
-
 	},
-	// Otras propiedades de estilo...
-
-	  error: {
-		color: 'red', // Define el color de texto para los errores
-		fontSize: 12, // Define el tamaño de fuente para los errores
-		marginTop: 5, // Define el margen superior para los errores
-		marginLeft:10
-	  },
-	  inputContainer2: {
-		marginBottom: 10, // Añade un margen inferior al contenedor para separarlo del siguiente campo de entrada
-	  },
-	  inputWrapper2: {
-		flexDirection: 'row',
+	loadingContainer: {
+		flex: 1,
+		justifyContent: 'center',
 		alignItems: 'center',
-		width: '90%',
-		borderColor: 'white',
-		borderWidth: 1,
-		borderRadius: 30,
+	},
+	containerLoading:{
+		flex: 1,
 		backgroundColor: 'white',
-		marginLeft: 25,
-	  },
+		padding: 0,
+	},
 })
 export default Page;
