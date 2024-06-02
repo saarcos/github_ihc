@@ -12,6 +12,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import Colors from '@/constants/Colors';
 import Day from 'react-native-calendars/src/calendar/day';
+import { defaultStyles } from '@/constants/Styles';
 
 interface Props {
     restaurante?: Restaurante;
@@ -32,6 +33,21 @@ const EditarPerfil = ({ restaurante }: Props) => {
             ),
         });
     }, [navigation]);
+    useLayoutEffect(() => {
+        navigation.setOptions({
+          headerShadowVisible: false,
+          headerShown: true,
+          headerTitle: '',
+          headerLeft: () => (
+            <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+              <MaterialIcons name="arrow-back" size={24} color={'white'} />
+            </TouchableOpacity>
+          ),
+          headerStyle: {
+            backgroundColor: '#E5332A',
+          },
+        });
+      }, [navigation]);
 
     const [categoria_id, setCategoria_id] = useState(restaurante?.categoria_id ? restaurante.categoria_id.toString() : '');
     const [nombre, setNombre] = useState(restaurante?.nombre || '');
@@ -112,7 +128,7 @@ const EditarPerfil = ({ restaurante }: Props) => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
             allowsEditing: true,
-            aspect: [5, 3],
+            aspect: [5, 5],
             quality: 1,
         });
 
@@ -473,7 +489,7 @@ const EditarPerfil = ({ restaurante }: Props) => {
     const handleUpdate = () => {
         setSelectedOption(null);
         if (selectedOption === 'info') {
-            if (nombreValido && direccionValido  && aforoValido ) {
+            if (nombreValido && direccionValido   ) {
                 handleChangeInfo();
             } else {
                 Alert.alert('Por favor, completa todos los campos correctamente.');
@@ -506,7 +522,18 @@ const EditarPerfil = ({ restaurante }: Props) => {
                 </TouchableOpacity>
             </View>
             {renderOptionForm(selectedOption || 'info')}
-            <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+            <TouchableOpacity  style={[
+          defaultStyles.btn,
+          (selectedOption === 'info' && (!nombreValido || !direccionValido )) ||
+          (selectedOption === 'password' && (!currentPasswordValida || !newPasswordValida))
+            ? styles.disabledButton
+            : null,
+        ] }
+        onPress={handleUpdate}
+        disabled={
+          (selectedOption === 'info' && (!nombreValido || !direccionValido)) ||
+          (selectedOption === 'password' && (!currentPasswordValida || !newPasswordValida))
+        }>
                 <Text style={styles.buttonText}>Actualizar</Text>
             </TouchableOpacity>
         </View>
@@ -532,25 +559,29 @@ const styles = StyleSheet.create({
     },
     optionText: {
         marginLeft: 10,
-        fontSize: 14,
+        fontSize: 13,
+
     },
     form: {
         marginBottom: 20,
     },
+    disabledButton: {
+        opacity: 0.5,
+    },
     input: {
-        height: 40,
+        height: 35,
         borderColor: 'gray',
         borderWidth: 1,
         padding: 10,
         marginBottom: 10,
     },
     label: {
-        fontSize: 16,
+        fontSize: 15,
         marginBottom: 5,
         color: '#333',
     },
     label2: {
-        fontSize: 16,
+        fontSize: 15,
         marginBottom: 5,
         color: '#333',
         textAlign: 'center',
@@ -594,14 +625,13 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: Colors.primary,
-        padding: 15,
-        borderRadius: 5,
-        alignItems: 'center',
-        marginTop: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 30,
     },
     buttonText: {
-        color: '#fff',
-        fontSize: 18,
+        color: 'white',
+        fontWeight: 'bold',
     },
     backButton: {
         marginLeft: 10,
