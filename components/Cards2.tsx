@@ -17,7 +17,7 @@ const Card2 = (props : CardsAtributos) => {
             />
             <View style={styles.cardContent}>
               <Text style={styles.title}>{titles}</Text>
-              <Text>{content}</Text>
+              <Text style={styles.content}>{content}</Text>
             </View>
           </View>
         </View>
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: '#E4E4E5',
-    width: 160,
+    width: 300,
     borderRadius: 10,
     padding: 10,
     shadowColor: '#000',
@@ -42,14 +42,22 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   cardContent: {
+    display:'flex',
+    flexDirection:'row',
     marginTop: 10,
   },
   title: {
-    fontSize: 10,
+    fontSize: 14,
     fontWeight: 'bold',
+    flex: 1
+  },
+  content: {
+    fontSize: 16,
+    flex: 1,  // Esto permite que el contenido ocupe el espacio necesario
+    textAlign: 'right' // Esto asegura que el contenido esté alineado a la derecha
   },
   image: {
-    width: '90%',
+    width: '100%',
     height: 150,
     borderRadius: 10,
   },

@@ -389,19 +389,19 @@ const EditarPerfil = ({ restaurante }: Props) => {
                         onChangeText={validarDireccion}
                     />
                     <Text style={styles.label}>Ingrese foto del Restaurante:</Text>
-                    {restaurante ? <View style={{ height: 200, margin: 10, position: 'relative' }}>
-                        {foto ? <Image source={{ uri: foto }} style={{ width: 230, height: 200 }} /> : null}
-                        <TouchableOpacity style={[styles.btnCamera, { position: 'absolute', bottom: 0, right: 0, margin: 10 }]} onPress={pickImage}>
-                            <AntDesign name="camera" size={24} color="white" />
-                        </TouchableOpacity>
-                    </View> :
-                        <View style={{ marginTop: 5, alignItems:'center'}}>
-                            {foto ? <Image source={{ uri: foto }} style={{ width: 230, height: 200 }} /> : <TouchableOpacity style={styles.btnCameraPlus} onPress={pickImage} >
-                                <MaterialIcons name="add-a-photo" size={94} color="gray" />
-                            </TouchableOpacity>}
-
-                        </View>}
-
+                        <View style={{justifyContent:'center', alignItems:'center'}}>
+                            {foto?<View style={{ height: 200, margin: 20, position: 'relative' }}>
+                                {foto ? <Image source={{ uri: foto }} style={{ width: 230, height: 200 }} /> : null}
+                                <TouchableOpacity style={[styles.btnCamera, { position: 'absolute', bottom: 0, right: 0 ,margin:10}]} onPress={pickImage}>
+                                    <AntDesign name="camera" size={24} color="white" />
+                                </TouchableOpacity>
+                            </View> :
+                            <View style={{margin:20}}>
+                                {foto ? <Image source={{ uri: foto }} style={{ width: 230, height: 200 }} /> : <TouchableOpacity style={styles.btnCameraPlus} onPress={pickImage} >
+                                    <MaterialIcons name="add-a-photo" size={94} color="gray" />
+                                </TouchableOpacity>}
+                            </View> }
+                        </View>
                     <TextInput
                         style={[styles.input, { backgroundColor: '#dddddd' ,marginTop:10}]}
                         placeholder="Aforo"
@@ -606,11 +606,14 @@ const styles = StyleSheet.create({
     backButton: {
         marginLeft: 10,
     },
-    btnCamera: {
-        backgroundColor: '#03A9F4',
-        padding: 10,
-        borderRadius: 5,
-    },
+    btnCamera:{
+        width:50,
+        height:50,
+        backgroundColor:'#E5332A',
+        borderRadius:50,
+        alignItems:'center',
+        justifyContent:'center'
+      },
     btnCameraPlus: {
         alignItems: 'center',
         justifyContent: 'center',

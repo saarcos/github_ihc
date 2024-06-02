@@ -8,7 +8,7 @@ import Categorias from '@/components/Categorias';
 import Colors from '@/constants/Colors';
 import Restaurantes from '@/components/Restaurantes';
 import { defaultStyles } from '@/constants/Styles';
-import Card2 from '@/components/Card';
+import Card2 from '@/components/Cards2';
 import { Link } from 'expo-router';
 import { Button } from 'react-native-paper';
 import {  getRestaurantes,  getCategoria, getPlatos } from '../api/api';
@@ -38,7 +38,7 @@ const PlatosModal: React.FC<PlatosModalProps> = ({ isVisible, platos, onBack, on
             >
                 <View style={styles.modalContainer1}>
                     <ScrollView contentContainerStyle={styles.modalContent1}>
-                        <Text style={styles.modalTitle}>Platos:</Text>
+                        <Text style={styles.modalTitle}>Platos</Text>
                         <TouchableOpacity
                             style={styles.closeButton}
                             onPress={onClose}
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'white',
         borderRadius: 10,
         padding: 50,
-        width: '100%',
+        width: 350,
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -447,7 +447,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         borderRadius: 10,
-        width: 120,
+        width: 250,
         height: 40,
         marginRight: 10,
         backgroundColor: Colors.red,
