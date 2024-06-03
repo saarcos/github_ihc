@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useLayoutEffect} from 'react';
 import { View, StyleSheet, Dimensions, TouchableOpacity, Alert, Text } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -9,6 +9,7 @@ import Colors from '@/constants/Colors';
 import MapViewDirections from 'react-native-maps-directions';
 import { GOOGLE_MAPS_KEY } from '@/components/enviroments';
 import { useQuery } from '@tanstack/react-query';
+import LoadingSpinner from '@/components/LoadingSpinner';  // Asegúrate de que la ruta sea correcta
 
 const { width, height } = Dimensions.get('window');
 const ASPECT_RATIO = width / height;
@@ -16,39 +17,39 @@ const LATITUDE_DELTA = 0.02;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 
 const Page = () => {
-  const navigation = useNavigation();
+  
   const { id } = useLocalSearchParams<{ id: string }>();
   const idComoNumero = parseInt(id);
-  const { data: restaurante } = useQuery({
+  const { data: restaurante, isLoading: isRestauranteLoading } = useQuery({
     queryKey: ['Restaurante', idComoNumero],
     queryFn: () => getRestauranteByID(idComoNumero),
   });
 
+  
+
   const mapRef = useRef<MapView>(null);
   const [userLocation, setUserLocation] = useState<any>(null); // Cambiado a any para flexibilidad de tipo
   const [destination, setDestination] = useState<any>(null); // Cambiado a any para flexibilidad de tipo
+  const [isLocationLoading, setIsLocationLoading] = useState(true);
+
+  const navigation=useNavigation();
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerTitle: '',
+      headerTransparent: true,
+      headerLeft: () => (
+        <TouchableOpacity style={styles.roundButton} onPress={() => navigation.goBack()}>
+          <Ionicons name="chevron-back" size={24} color={'#000'} />
+        </TouchableOpacity>
+      ),
+    });
+  }, []);
 
   useEffect(() => {
     getLocationPermission();
   }, []);
 
-  useEffect(() => {
-    if (restaurante) {
-      navigation.setOptions({
-        headerTitle: restaurante.nombre,
-        headerTransparent: true,
-        headerTitleStyle: {
-          color: '#000',
-          marginLeft: 10,
-        },
-        headerLeft: () => (
-          <TouchableOpacity style={styles.roundButton} onPress={() => navigation.goBack()}>
-            <Ionicons name="chevron-back" size={24} color={'#000'} />
-          </TouchableOpacity>
-        ),
-      });
-    }
-  }, [navigation, restaurante]);
+  
 
   const getLocationPermission = async () => {
     try {
@@ -60,6 +61,7 @@ const Page = () => {
       const location = await Location.getCurrentPositionAsync({});
       const { latitude, longitude } = location.coords;
       setUserLocation({ latitude, longitude });
+      setIsLocationLoading(false);
 
       if (mapRef.current) {
         mapRef.current.animateToRegion({
@@ -72,6 +74,7 @@ const Page = () => {
     } catch (error: any) {
       console.log('Error al obtener la ubicación:', error.message);
       Alert.alert('Error', 'No se pudo obtener la ubicación actual del usuario.');
+      setIsLocationLoading(false);
     }
   };
 
@@ -142,6 +145,14 @@ const Page = () => {
       });
     }
   }, [userLocation, destination]);
+
+  if (isRestauranteLoading || isLocationLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <LoadingSpinner />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -233,6 +244,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     marginLeft: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
   },
 });
 
