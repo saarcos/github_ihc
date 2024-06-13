@@ -109,13 +109,18 @@ const EditarPerfil = ({ restaurante }: Props) => {
                 setNombre(usuario.nombre || '');
                 setCategoria_id(usuario.categoria_id.toString() || '');
                 setDireccion(usuario.direccion || '');
+      
+                // Dividir la dirección para obtener solo la parte después de la primera coma y el espacio
+                const direccionSplit = usuario.direccion.split(', ');
+                const direccionDespuesComa = direccionSplit.length > 1 ? direccionSplit.slice(1).join(', ') : '';
+      
+                setDireccion(direccionDespuesComa);
                 setAforo(usuario.aforo.toString() || '');
                 setHoraapertura(parse(usuario.horaApertura, 'HH:mm', new Date()));
                 setHoracierre(parse(usuario.horaCierre, 'HH:mm', new Date()));
                 setFoto(usuario.foto || '');
                 validarNombre(usuario.nombre || ''); 
-                validarDireccion(usuario.direccion || ''); 
-
+                validarDireccion(direccionDespuesComa); // Validar solo la parte después de la primera coma y el espacio
               }
             }
           }
@@ -205,6 +210,7 @@ const EditarPerfil = ({ restaurante }: Props) => {
     const handleChangeInfo = async () => {
         const auth = getAuth(app);
         const currentUser = auth.currentUser;
+        const direccionConcatenada = `${nombre}, ${direccion}`;
         if (currentUser) {
             try {
                 const correo = await obtenerCorreoUsuario();
@@ -213,7 +219,7 @@ const EditarPerfil = ({ restaurante }: Props) => {
                     const modUsuario = {
                         categoria_id: parseFloat(categoria_id),
                         nombre: nombre,
-                        direccion: direccion,
+                        direccion: direccionConcatenada,
                         foto: foto,
                         aforo: parseFloat(aforo),
                         horaApertura: format(horaapertura, 'HH:mm'),
@@ -252,6 +258,9 @@ const EditarPerfil = ({ restaurante }: Props) => {
         }
         setCategoria_id(value);
     };
+    const capitalizeWords = (text: string): string => {
+        return text.replace(/\b\w/g, (char: string) => char.toUpperCase());
+      };
     const validarNombre = (value: string) => {
         if (value.trim() === '') {
             setNombreValido(false);
@@ -260,7 +269,8 @@ const EditarPerfil = ({ restaurante }: Props) => {
             setNombreValido(true);
             setErrors(prevErrors => ({ ...prevErrors, nombre: '' }));
         }
-        setNombre(value);
+        const formattedText = capitalizeWords(value);
+        setNombre(formattedText);
     };
 
     const validarDireccion = (value: string) => {
@@ -273,6 +283,7 @@ const EditarPerfil = ({ restaurante }: Props) => {
         }
         setDireccion(value);
     };
+
     const validarFoto = (value: string) => {
         if (value.trim() === '') {
             setFotoValido(false);

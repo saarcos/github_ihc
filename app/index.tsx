@@ -98,27 +98,19 @@ const Page = () => {
 
 	const SignIn = async () => {
 		try {
-			const emailValid = /^[a-zA-Z0-9]+(?:\.[a-zA-Z0-9]+)*@[a-zA-Z0-9]+\.[A-Za-z]{2,}$/;
-			const trimmedEmail = email.trim();
-			const trimmedPassword = password.trim();
-			const invalidCharsRegex = /[^\w.+-@]/;
+			const emailValido = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+        	const trimmedEmail = email.trim();
+        	const trimmedPassword = password.trim();
 
-			if (trimmedEmail === '' || trimmedPassword === '') {
-				Alert.alert('Error', 'Por favor, completa todos los campos.');
-				return;
-			}
-			if (email !== trimmedEmail || password !== trimmedPassword) {
-				Alert.alert('Error', 'No se permiten espacios en blanco. Por favor, vuelve a escribir tu correo o contraseña.');
-				return;
-			}
-			if (/[A-Z]/.test(trimmedEmail)) {
-				Alert.alert('Error', 'Los correos electrónicos no deben contener letras mayúsculas.');
-				return;
-			}
-			if (!emailValid.test(trimmedEmail) || invalidCharsRegex.test(trimmedEmail) || trimmedPassword.length < 7) {
-				Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 7 caracteres');
-				return;
-			}
+        if (!trimmedEmail || !trimmedPassword) {
+            Alert.alert('Error', 'Por favor, completa todos los campos.');
+            return;
+        }
+
+        if (/[A-Z]/.test(trimmedEmail) || !emailValido.test(trimmedEmail) || trimmedPassword.length < 7) {
+            Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 7 caracteres.');
+            return;
+        }
 			setLoading(true);
 			const { esRestaurante, esUsuario } = await verificarCorreo(trimmedEmail);
 			signInWithEmailAndPassword(auth, trimmedEmail, trimmedPassword)

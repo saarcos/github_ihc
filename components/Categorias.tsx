@@ -39,7 +39,7 @@ const Categorias = ({ categoriaId, nombre, setActiveCategory, isActive  }: Props
             <TouchableOpacity onPress={() => setActiveCategory(categoriaId)} style={{ padding: 10, borderRadius: 45 }}>
                 <FontAwesome6
                     name={categoriaIconos[nombre]}
-                    size={35}  // Reducir el tamaño del icono a 40
+                    size={30}  // Reducir el tamaño del icono a 40
                     color={isActive ? 'red' : 'black'} 
                 />
             </TouchableOpacity>

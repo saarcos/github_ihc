@@ -12,10 +12,10 @@ import { firebaseConfig } from '../../firebase-config';
 
 const Page = () => {
   const router = useRouter();
-  const navigation=useNavigation();
-  useLayoutEffect(()=>{
+  const navigation = useNavigation();
+  useLayoutEffect(() => {
     navigation.setOptions({
-      headerShown:false,
+      headerShown: false,
     })
   })
   const handleRegisterPress = () => {
@@ -23,7 +23,7 @@ const Page = () => {
     router.back();
   };
   useWarmUpBrowser();
-  
+
   function SvgTop() {
     return (
       <Svg
@@ -51,7 +51,7 @@ const Page = () => {
           </LinearGradient>
         </Defs>
         <Image
-          x={100.5} 
+          x={100.5}
           y={42.5}
           width="195"
           height="195"
@@ -69,18 +69,17 @@ const Page = () => {
   const auth = getAuth(app);
 
   const SignIn = () => {
-
     const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    if (!emailValid.test(email) || password.length < 6) {
-      Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 6 caracteres');
+    if (!emailValid.test(email) || password.length < 7) {
+      Alert.alert('Error', 'Por favor, ingresa un correo electrónico válido y una contraseña de al menos 8 caracteres');
       return;
     }
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
         setCurrentUser(user);
-        router.push({ pathname: '/(protected)'});
+        router.push({ pathname: '/(protected)' });
         setEmail('');
         setPassword('');
       })
@@ -115,7 +114,7 @@ const Page = () => {
         <TouchableOpacity style={[defaultStyles.btn]} onPress={SignIn}>
           <Text style={[defaultStyles.btnText]}>Ingresar</Text>
         </TouchableOpacity>
-        <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 5}}>
+        <View style={{ justifyContent: 'center', alignItems: 'center', marginTop: 5 }}>
           <Link href="/(modals)/recoverPassword" asChild>
             <TouchableOpacity onPress={handleRegisterPress}>
               <Text style={styles.btnText}>¿Olvidó su contraseña?</Text>
@@ -140,7 +139,6 @@ const Page = () => {
     </Animated.ScrollView>
   )
 };
-
 
 const styles = StyleSheet.create({
   container: {

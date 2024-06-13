@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useLayoutEffect} from 'react';
+import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import { View, StyleSheet, Dimensions, TouchableOpacity, Alert, Text } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
@@ -95,7 +95,7 @@ const Page = () => {
         const response = await fetch(
           `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
             direccion
-          )}&key=${GOOGLE_MAPS_KEY}`
+          )}&key=${GOOGLE_MAPS_KEY}&components=country:EC`
         );
         const data = await response.json();
   

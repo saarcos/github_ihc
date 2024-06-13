@@ -84,12 +84,13 @@ const Registro = ({ restaurante }: Props) => {
 
   const handleCrearRestaurante = async () => {
     try {
+      const direccionConcatenada = `${nombreRestaurante}, ${direccion}`;
       const insertarRestaurantes = {
         categoria_id: parseFloat(categoria),
         nombre: nombreRestaurante,
         correo: email,
         password_restaurante: password,
-        direccion: direccion,
+        direccion: direccionConcatenada,
         foto: foto,
         aforo: parseFloat(aforo),
         horaApertura: format(horaapertura, 'HH:mm'),
@@ -134,6 +135,9 @@ const Registro = ({ restaurante }: Props) => {
     }
     setAforo(text);
   };
+  const capitalizeWords = (text: string): string => {
+    return text.replace(/\b\w/g, (char: string) => char.toUpperCase());
+  };
 
   const validarNombreRestaurante = (text: string) => {
     if (!text.trim()) {
@@ -141,7 +145,8 @@ const Registro = ({ restaurante }: Props) => {
     } else {
       setErrors(prevErrors => ({ ...prevErrors, nombreRestaurante: '' }));
     }
-    setNombreRestaurante(text);
+    const formattedText = capitalizeWords(text);
+    setNombreRestaurante(formattedText);
   };
 
 

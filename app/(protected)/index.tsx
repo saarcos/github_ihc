@@ -229,6 +229,7 @@ const Page: React.FC = () => {
 
     return (
         <View style={[defaultStyles.container, { padding: 10 }]}>
+            
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriasContainer}>
                 {loadingCategorias && <ActivityIndicator style={styles.spinner} size="large" color={Colors.dark} />}
                 {errorCategorias && <Text>Error al cargar las categorías</Text>}
@@ -243,6 +244,17 @@ const Page: React.FC = () => {
                         />
                     ))}
             </ScrollView>
+            <View style={styles.scrollIndicator}>
+                <View style={styles.indicatorText}>
+                    <Text>Desliza para ver más opciones</Text>
+                </View>
+                <View style={styles.indicatorArrows}>
+                    <MaterialIcons name="arrow-back" size={24} color="black" style={styles.indicatorArrowIcon} />
+                    <MaterialIcons name="arrow-forward" size={24} color="black" style={styles.indicatorArrowIcon} />
+                </View>
+            </View>
+            
+
 
             {loadingRestaurantes && <ActivityIndicator style={styles.spinner} size="large" color={Colors.dark} />}
             {errorRestaurantes && <Text>Error al cargar los restaurantes</Text>}
@@ -456,6 +468,34 @@ const styles = StyleSheet.create({
         fontSize: 14, 
         fontFamily: 'appfont-bold',
         color: 'white',
+    },
+    scrollIndicator: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 20,
+        marginBottom: 10,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+    },
+    indicatorText: {
+        flex: 1,
+    },
+    indicatorArrows: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    indicatorArrowIcon: {
+        marginHorizontal: 5,
     },
 });
 
