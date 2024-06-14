@@ -76,7 +76,7 @@ const Restaurantes = ({ restaurante, isFavoriteView }: Props) => {
                 <Text style={styles.titulo}>{restaurante.nombre}</Text>
               </View>
               <Text>{restaurante.direccion}</Text>
-              <Link href={`/menu/${restaurante.id}`} asChild>
+              <Link href={`/menu/${restaurante.id}`}>
                 <Button
                   mode="contained"
                   style={styles.verMenuButton}

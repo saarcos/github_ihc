@@ -62,25 +62,23 @@ const PlatosModal: React.FC<PlatosModalProps> = ({ isVisible, platos, onBack, on
                                                 content={`Precio: $${item.precio}`}
                                                 imageUrl={item.foto}
                                             />
-                                             <Link href={`/menu/${item.id_restaurante}`} asChild>
-                                                    <Button
-                                                        mode="contained"
-                                                        style={styles.verMenuButton}
-                                                        labelStyle={styles.verMenuButtonLabel}
-                                                    >
-                                                        Ver Menú
-                                                    </Button>
+                                            <Link href={`/menu/${item.id_restaurante}`}>
+                                                <Button
+                                                    mode="contained"
+                                                    style={styles.verMenuButton}
+                                                    labelStyle={styles.verMenuButtonLabel}
+                                                >
+                                                    Ver Menú
+                                                </Button>
                                             </Link>
                                             {nextItem && (
-                                                <Card2
-                                                    titles={nextItem.nombre}
-                                                    content={`Precio: $${nextItem.precio}`}
-                                                    imageUrl={nextItem.foto}
-                                                />
-                                                
-                                            )}
-                                            {nextItem && (
-                                                    <Link href={`/menu/${nextItem.id_restaurante}`} asChild>
+                                                <>
+                                                    <Card2
+                                                        titles={nextItem.nombre}
+                                                        content={`Precio: $${nextItem.precio}`}
+                                                        imageUrl={nextItem.foto}
+                                                    />
+                                                    <Link href={`/menu/${nextItem.id_restaurante}`}>
                                                         <Button
                                                             mode="contained"
                                                             style={styles.verMenuButton}
@@ -89,6 +87,7 @@ const PlatosModal: React.FC<PlatosModalProps> = ({ isVisible, platos, onBack, on
                                                             Ver Menú
                                                         </Button>
                                                     </Link>
+                                                </>
                                             )}
                                         </View>
                                     </View>
